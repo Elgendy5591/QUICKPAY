@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klarfall Webseite</title>
+<link rel="icon" href="/assets/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE occasion, calm and trustworthy: help after a crash
+   IDEA a route map from crash to payout, each station a service
+   PICTURE a road across the blue hero with a car and five stations
+   COLOUR Klarfall blue field, white, ink, green for money that arrives
+   TYPE Space Grotesk display + Inter text
+   LAYOUT title across the top, road picture full width beneath; phone: stations stack */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0c1018);--ink:light-dark(#0F172A,#e7ebf3);--mut:light-dark(#4b5563,#a3adbd);--soft:light-dark(#f2f5fb,#141a26);--line:light-dark(#dce1e8,#283043);--blue:light-dark(#1F4FD8,#7c9bff);--field:light-dark(#1F4FD8,#18306f);--green:light-dark(#15803D,#4ade80);--amber:light-dark(#92400E,#fbbf24);--card:light-dark(#ffffff,#111723)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:72px;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:'Space Grotesk',Inter,sans-serif;line-height:1.08;letter-spacing:-.02em;text-wrap:balance;margin:0}
+h2{font-size:clamp(28px,3.4vw,40px)}h3{font-size:20px}
+p{margin:0;text-wrap:pretty}
+a{color:var(--blue)}
+.wrap{max-width:1240px;margin:0 auto}
+.band{padding:clamp(40px,5vw,80px) max(5vw,16px)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:12px;font:600 16px Inter,sans-serif;text-decoration:none;border:0;cursor:pointer}
+.b1{background:#fff;color:#1F4FD8}.b1:hover{background:#e8eefc}
+.b2{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.6)}.b2:hover{background:rgba(255,255,255,.12)}
+.bp{background:var(--blue);color:#fff}.bp:hover{filter:brightness(.92)}
+.bg{background:transparent;color:var(--ink);border:1px solid var(--line)}
+:focus-visible{outline:3px solid #ffb020;outline-offset:2px}
+nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;padding:10px max(5vw,16px)}
+.logo{display:flex;align-items:center;gap:8px;font:700 20px 'Space Grotesk',sans-serif;color:var(--ink);text-decoration:none;margin-right:auto}
+.logo i{width:30px;height:30px;border-radius:9px;background:#1F4FD8;display:grid;place-items:center}
+.nl{display:flex;flex-wrap:wrap;gap:4px 18px}.nl a{color:var(--ink);text-decoration:none;font-weight:500;font-size:15px;padding:8px 0}.nl a:hover{color:var(--blue)}
+select{font:500 15px Inter,sans-serif;min-height:40px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 8px}
+.hero{background:var(--field);color:#fff}
+.hero h1{font-size:clamp(36px,5.2vw,64px);max-width:15ch}
+.hero .lead{font-size:clamp(17px,1.6vw,20px);max-width:56ch;margin-top:16px;color:#e4ebff}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.road{position:relative;margin-top:44px}
+.road svg{display:block;width:100%;height:120px}
+.st{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-top:6px}
+.st div{display:flex;flex-direction:column;gap:2px}
+.st b{font:700 clamp(20px,2vw,26px) 'Space Grotesk',sans-serif}
+.st span{color:#d7e1ff;font-size:14px}
+.st .ok b{color:#86efac}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:28px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:10px}
+.ic{width:44px;height:44px;border-radius:12px;background:color-mix(in srgb,var(--blue) 14%,transparent);color:var(--blue);display:grid;place-items:center}
+.mut{color:var(--mut)}
+.soft{background:var(--soft)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:start}
+.list{display:grid;gap:10px;margin-top:18px}
+.list div{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.list svg{flex:none;margin-top:3px}
+.form{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:clamp(18px,3vw,30px);display:flex;flex-direction:column;gap:16px}
+.prog{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.prog i{height:6px;border-radius:3px;background:var(--line)}.prog i.on{background:var(--blue)}
+label{font-weight:600;font-size:15px;display:block;margin-bottom:6px}
+input[type=text],input[type=tel],input[type=email],input[type=number],textarea{width:100%;min-height:48px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:16px Inter,sans-serif}
+textarea{min-height:96px;resize:vertical}
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.opt{min-height:52px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:600 14px Inter,sans-serif;padding:6px 8px;cursor:pointer}
+.opt[aria-pressed=true]{border:2px solid var(--blue);background:color-mix(in srgb,var(--blue) 10%,var(--bg));color:var(--blue)}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px}.thumbs img{width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
+.note{font-size:13px;color:var(--mut)}
+.res{font:700 clamp(40px,6vw,64px) 'Space Grotesk',sans-serif;color:var(--green);line-height:1;white-space:nowrap}
+.calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;margin-top:28px}
+.rng{display:grid;gap:4px}.rng .row b{font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=range]{width:100%;accent-color:var(--blue);height:32px}
+.bar{display:grid;grid-template-columns:minmax(0,11em) minmax(0,1fr) max-content;gap:12px;align-items:center;font-size:14px}
+.bar i{display:block;height:14px;border-radius:7px;background:var(--blue)}
+.bar b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.dash{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card)}
+.dash .top{display:flex;gap:10px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--soft);font-size:13px;font-weight:600}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{text-align:left;color:var(--mut);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.pg{background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)}.pa{background:color-mix(in srgb,var(--amber) 18%,transparent);color:var(--amber)}.pb{background:color-mix(in srgb,var(--blue) 14%,transparent);color:var(--blue)}
+details{border-bottom:1px solid var(--line);padding:14px 0}summary{font-weight:600;cursor:pointer;font-size:17px;min-height:32px}details p{margin-top:8px;color:var(--mut)}
+footer{background:#0F172A;color:#cbd5e1}footer a{color:#cbd5e1}
+.fcol{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+@media(max-width:900px){.grid3{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.calc,.two{grid-template-columns:minmax(0,1fr)}.fcol{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:600px){.grid3,.fcol{grid-template-columns:minmax(0,1fr)}.st{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.road svg{height:70px}.opts{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.nl{order:3;width:100%;overflow-x:auto;flex-wrap:nowrap}.nl a{flex:none}.bar{grid-template-columns:minmax(0,1fr) max-content}.bar i{grid-column:1/-1;grid-row:2}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}#car{animation:none!important}}
+@keyframes drive{from{transform:translateX(0)}to{transform:translateX(var(--d,600px))}}
+</style>
+</head>
+<body>
+<nav aria-label="Hauptnavigation"><div class="wrap">
+  <a class="logo" href="#top"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg></i>Klarfall</a>
+  <div class="nl"><a href="#ablauf">So geht's</a><a href="#melden">Unfall melden</a><a href="#firmen">Für Firmen</a><a href="#partner">Für Partner</a><a href="#fragen">Fragen</a><a href="/app/">Mein Fall</a><a href="/portal/">Partner-Login</a></div>
+  <label for="lang" style="position:absolute;left:-9999px">Sprache</label>
+  <select id="lang"><option>Deutsch</option><option>Türkçe</option><option>العربية</option><option>English</option></select>
+</div></nav>
+
+<header class="hero band" id="top"><div class="wrap">
+  <h1>Unfall gehabt? Wir regeln alles, du zahlst nichts.</h1>
+  <p class="lead">Melde den Unfall in 3 Minuten. Ein unabhängiger Gutachter sieht sich den Schaden in rund 60 Minuten per Video an. Anwalt, Werkstatt und Ersatzwagen organisieren wir – bei unverschuldetem Unfall zahlt die Versicherung des Gegners.</p>
+  <div class="cta"><a class="btn b1" href="#melden">Unfall jetzt melden</a><a class="btn b2" href="#firmen">Lösung für Flotten</a></div>
+  <div class="road" aria-hidden="true">
+    <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+      <path d="M0 78 C200 40 320 110 520 72 S860 40 1200 70" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="26" stroke-linecap="round"/>
+      <path d="M0 78 C200 40 320 110 520 72 S860 40 1200 70" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="14 12" opacity=".75"/>
+      <g fill="#fff"><circle cx="120" cy="62" r="9"/><circle cx="360" cy="86" r="9"/><circle cx="600" cy="64" r="9"/><circle cx="840" cy="54" r="9"/></g>
+      <circle cx="1080" cy="64" r="12" fill="#86efac"/>
+    </svg>
+    <svg id="car" viewBox="0 0 70 34" style="position:absolute;left:0;top:34px;width:70px;height:34px;animation:drive 9s ease-in-out infinite alternate"><path d="M4 26 8 15q3-6 11-7h26q8 0 13 7l6 2q4 1 4 5v4z" fill="#fff"/><path d="M17 15l4-5h12v5zM37 10h8q5 1 8 5H37z" fill="#1F4FD8" opacity=".55"/><circle cx="18" cy="27" r="6" fill="#0F172A"/><circle cx="52" cy="27" r="6" fill="#0F172A"/></svg>
+  </div>
+  <div class="st">
+    <div><b>3 Min.</b><span>Unfall melden, mit KI-Fotohilfe</span></div>
+    <div><b>60 Min.</b><span>Gutachten per Video</span></div>
+    <div><b>1 Tag</b><span>Anwalt meldet alle Ansprüche an</span></div>
+    <div><b>Werkstatt</b><span>Reparatur und Ersatzwagen</span></div>
+    <div class="ok"><b>0 €</b><span>Auszahlung, ohne Vorkasse</span></div>
+  </div>
+</div></header>
+
+<section class="band" id="ablauf"><div class="wrap">
+  <h2>So läuft es ab</h2>
+  <p class="mut" style="margin-top:10px;max-width:60ch">Alles in der App oder hier im Browser. Du siehst jederzeit, wo dein Fall steht – auf Deutsch, Türkisch, Arabisch oder Englisch.</p>
+  <div class="grid3">
+    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7h3l2-3h8l2 3h3v13H3z"/><circle cx="12" cy="13" r="4"/></svg></span><h3>Melden &amp; fotografieren</h3><p class="mut">Die KI zeigt dir, welche Fotos fehlen, liest das Kennzeichen und findet die Versicherung des Gegners.</p></div>
+    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span><h3>Schuld-Check</h3><p class="mut">Eine Fachanwältin für Verkehrsrecht prüft kurz, ob der Gegner haftet. Erst dann entstehen Kosten – für die Gegenseite.</p></div>
+    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3"/></svg></span><h3>Gutachten</h3><p class="mut">Kleine Schäden per Videocall, große vor Ort. Unabhängige Sachverständige, nicht die der gegnerischen Versicherung.</p></div>
+    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v4h4M9 14l2 2 4-4"/></svg></span><h3>Vollmacht digital</h3><p class="mut">Einmal mit dem Finger unterschreiben. Gutachter und Werkstatt rechnen direkt mit der Versicherung ab.</p></div>
+    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 17h2l2-6h7l3 6h4M7 17a2 2 0 1 0 4 0M15 17a2 2 0 1 0 4 0"/></svg></span><h3>Abschleppen, Werkstatt, Ersatzwagen</h3><p class="mut">Unsere Partner sind rund um die Uhr erreichbar. Deine Wunschwerkstatt geht natürlich auch.</p></div>
+    <div class="card"><span class="ic" style="color:var(--green);background:color-mix(in srgb,var(--green) 14%,transparent)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><h3>Live-Status bis zur Auszahlung</h3><p class="mut">Jedes Schreiben, jede Zahlung, jeder Schritt – sichtbar, ohne Warteschleife.</p></div>
+  </div>
+</div></section>
+
+<section class="band soft"><div class="wrap two">
+  <div>
+    <h2>Was dir nach einem unverschuldeten Unfall zusteht</h2>
+    <p class="mut" style="margin-top:12px">Viele bekommen weniger, als ihnen zusteht, weil sie die Abwicklung der gegnerischen Versicherung überlassen. Wir fordern alles.</p>
+    <div class="list">
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span><b>Reparatur</b> oder Wiederbeschaffungswert</span></div>
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span><b>Eigener Gutachter</b> ab etwa 750 € Schaden</span></div>
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span><b>Eigener Anwalt</b>, bezahlt von der Gegenseite</span></div>
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span><b>Wertminderung</b>, weil ein Unfallauto weniger wert ist</span></div>
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span><b>Ersatzwagen oder Nutzungsausfall</b> pro Tag</span></div>
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span><b>Verdienstausfall</b> für Taxi, Mietwagen und Gewerbe</span></div>
+    </div>
+  </div>
+  <div class="card" style="gap:14px">
+    <h3>Klarfall-Garantie</h3>
+    <p>Stellt sich später doch eine Teilschuld heraus und du hast ehrlich gemeldet, zahlst du für Gutachter und Anwalt höchstens einen festen Betrag. Den Rest tragen wir.</p>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px">
+      <div style="padding:16px;border-radius:14px;background:var(--soft)"><span class="mut" style="font-size:14px">mit Verkehrsrechtsschutz</span><div class="res" style="font-size:clamp(30px,4vw,42px);color:var(--blue)">max. 300 €</div></div>
+      <div style="padding:16px;border-radius:14px;background:var(--soft)"><span class="mut" style="font-size:14px">ohne Verkehrsrechtsschutz</span><div class="res" style="font-size:clamp(30px,4vw,42px);color:var(--blue)">max. 500 €</div></div>
+    </div>
+    <p class="note">Bei eigener Hauptschuld helfen wir dir mit deiner Kasko und einer günstigen Partnerwerkstatt. Allgemeine Informationen, keine Rechtsberatung.</p>
+  </div>
+</div></section>
+
+<section class="band" id="melden"><div class="wrap two">
+  <div>
+    <h2>Unfall melden</h2>
+    <p class="mut" style="margin-top:12px;max-width:46ch">Vier kurze Schritte. Danach meldet sich ein Mensch aus unserem Team – in deiner Sprache.</p>
+    <div class="list">
+      <div><b style="min-width:5.5em">Verletzte?</b><span>Ruf zuerst 112. Polizei: 110.</span></div>
+      <div><b style="min-width:5.5em">Wichtig</b><span>Keine Schuld anerkennen und nichts unterschreiben.</span></div>
+      <div><b style="min-width:5.5em">Hotline</b><span>24/7 unter 030 555 0123 · auch per WhatsApp</span></div>
+    </div>
+  </div>
+  <form class="form" id="f" novalidate>
+    <div class="prog" id="prog"><i class="on"></i><i></i><i></i><i></i></div>
+    <div data-s="1">
+      <label>Was ist passiert?</label>
+      <div class="opts" id="typ"></div>
+      <div style="margin-top:14px"><label for="ort">Wo und wann?</label><input id="ort" type="text" placeholder="z. B. Kantstraße 120, heute 8:40"></div>
+    </div>
+    <div data-s="2" hidden>
+      <label for="kz">Kennzeichen des Unfallgegners</label><input id="kz" type="text" placeholder="B-AB 1234" autocomplete="off">
+      <div style="margin-top:14px"><label for="fo">Fotos vom Schaden und vom Unfallort</label><input id="fo" type="file" accept="image/*" multiple style="font:15px Inter,sans-serif"></div>
+      <div class="thumbs" id="th" style="margin-top:10px"></div>
+      <div style="margin-top:14px"><label for="txt">Kurz beschreiben (optional)</label><textarea id="txt" placeholder="Ich stand an der Ampel, der andere ist aufgefahren."></textarea></div>
+    </div>
+    <div data-s="3" hidden>
+      <label>Hast du eine Verkehrsrechtsschutzversicherung?</label>
+      <div class="opts" id="rs" style="grid-template-columns:repeat(3,minmax(0,1fr))"></div>
+      <label style="margin-top:14px">Was brauchst du?</label>
+      <div class="opts" id="ext"></div>
+      <label style="margin-top:14px;display:flex;gap:10px;align-items:center;font-weight:500"><input id="gew" type="checkbox" style="width:22px;height:22px;accent-color:var(--blue)">Ich fahre gewerblich (Taxi, Mietwagen, Uber/Bolt)</label>
+    </div>
+    <div data-s="4" hidden>
+      <div style="display:grid;gap:12px">
+        <div><label for="nm">Name</label><input id="nm" type="text" autocomplete="name"></div>
+        <div><label for="tel">Telefon oder WhatsApp</label><input id="tel" type="tel" autocomplete="tel"></div>
+        <div><label for="em">E-Mail (optional)</label><input id="em" type="email" autocomplete="email"></div>
+      </div>
+    </div>
+    <div data-s="5" hidden id="done"></div>
+    <p class="note" id="err" role="alert" style="color:#b42318;min-height:1em"></p>
+    <div class="row" id="nav"><button type="button" class="btn bg" id="back">Zurück</button><button type="submit" class="btn bp" id="next">Weiter</button></div>
+  </form>
+</div></section>
+
+<section class="band soft" id="firmen"><div class="wrap">
+  <h2>Für Flotten: alle Schäden aller Fahrzeuge auf einen Blick</h2>
+  <p class="mut" style="margin-top:12px;max-width:66ch">Taxi, Mietwagen, Lieferdienst, Handwerk, Pflegedienst: Fahrer melden selbst per App, das Büro sieht sofort, was offen, gekürzt oder bezahlt ist – über mehrere Firmen hinweg.</p>
+  <div class="calc">
+    <div class="card" style="gap:14px">
+      <h3>Was spart eure Flotte?</h3>
+      <div class="rng"><div class="row"><label for="v" style="margin:0">Fahrzeuge</label><b id="vV"></b></div><input id="v" type="range" min="5" max="500" step="5" value="60"></div>
+      <div class="rng"><div class="row"><label for="u" style="margin:0">Unfälle pro Fahrzeug und Jahr</label><b id="uV"></b></div><input id="u" type="range" min="0.1" max="1.2" step="0.01" value="0.63"></div>
+      <div class="rng"><div class="row"><label for="n" style="margin:0">Davon ohne eigene Schuld</label><b id="nV"></b></div><input id="n" type="range" min="20" max="90" step="1" value="66"></div>
+      <div class="rng"><div class="row"><label for="t" style="margin:0">Ausfalltage pro Unfall</label><b id="tV"></b></div><input id="t" type="range" min="1" max="15" step="1" value="5"></div>
+      <div class="rng"><div class="row"><label for="e" style="margin:0">Umsatz pro Fahrzeug und Tag</label><b id="eV"></b></div><input id="e" type="range" min="50" max="400" step="10" value="200"></div>
+      <button type="button" class="btn bg" id="reset" style="align-self:flex-start">Beispielflotte</button>
+    </div>
+    <div class="card" style="gap:14px">
+      <span class="mut">Mögliche Ersparnis pro Jahr</span>
+      <div class="res" id="sum"></div>
+      <div id="bars" style="display:grid;gap:12px"></div>
+      <p class="note">Schätzung mit Annahmen: Verdienstausfall wird vollständig gefordert, 300 € mehr Nebenkosten pro Fall, 30 % weniger eigene Unfälle à 2.500 €, 4 Std. Büroarbeit pro Fall à 28 €. Beispielwerte: eine Berliner Mietwagenflotte mit 60 Autos.</p>
+    </div>
+  </div>
+  <div class="dash" style="margin-top:24px">
+    <div class="top"><span>Flotten-Portal</span><span class="mut">Alle Firmen (3)</span><span class="pill pa" style="margin-left:auto">18.420 € offen</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>Fall</th><th>Fahrzeug</th><th>Haftung</th><th>Status</th><th class="num">Gefordert</th><th class="num">Bezahlt</th></tr></thead>
+      <tbody>
+        <tr><td>#1043</td><td>B-KM 2210</td><td>Gegner 100 %</td><td><span class="pill pb">Versicherung prüft</span></td><td class="num">5.910 €</td><td class="num">0 €</td></tr>
+        <tr><td>#1039</td><td>B-TX 7781</td><td>Gegner 100 %</td><td><span class="pill pa">Teilbezahlt</span></td><td class="num">7.240 €</td><td class="num">5.100 €</td></tr>
+        <tr><td>#1018</td><td>B-KM 8812</td><td>Gegner 100 %</td><td><span class="pill pg">Bezahlt</span></td><td class="num">6.300 €</td><td class="num">6.300 €</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="cta"><a class="btn bp" href="#kontakt">Demo für eure Flotte anfragen</a><a class="btn bg" href="/portal/">Firmen-Login</a></div>
+</div></section>
+
+<section class="band" id="partner"><div class="wrap">
+  <h2>Partner werden</h2>
+  <p class="mut" style="margin-top:12px;max-width:62ch">Fertig vorbereitete Fälle mit Fotos, Hergang und Vollmacht – über ein eigenes Partner-Portal.</p>
+  <div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+    <div class="card"><h3>Sachverständige</h3><p class="mut">Video-Aufträge mit KI-Teileliste, Vor-Ort-Termine mit Route. Honorar per Abtretung direkt von der Versicherung.</p></div>
+    <div class="card"><h3>Kanzleien</h3><p class="mut">Digitale Akten, Schuld-Vorprüfung, Fristen und Vorlagen. Festes Software-Abo, unabhängig von der Zahl der Mandate.</p></div>
+    <div class="card"><h3>Werkstätten</h3><p class="mut">Aufträge mit fertigem Gutachten, Kunden-Updates per Klick, Rechnung direkt an die Versicherung.</p></div>
+    <div class="card"><h3>Vermietung &amp; Abschleppen</h3><p class="mut">Anfragen in Echtzeit, Mietdauer passend zum Reparaturstand, 24/7.</p></div>
+  </div>
+</div></section>
+
+<section class="band soft" id="fragen"><div class="wrap two">
+  <h2>Häufige Fragen</h2>
+  <div>
+    <details open><summary>Was kostet mich das?</summary><p>Bei einem Unfall ohne eigene Schuld nichts. Die Haftpflichtversicherung des Verursachers zahlt Gutachter, Anwalt, Reparatur und Ersatzwagen.</p></details>
+    <details><summary>Und wenn ich teilweise schuld bin?</summary><p>Dann werden die Kosten nach der Haftungsquote geteilt. Mit der Klarfall-Garantie zahlst du für Gutachter und Anwalt höchstens 300 € (mit Rechtsschutz) oder 500 € (ohne).</p></details>
+    <details><summary>Muss ich etwas vorstrecken?</summary><p>Nein. Gutachter, Werkstatt und Vermieter rechnen direkt mit der Versicherung ab.</p></details>
+    <details><summary>Kann ich meine eigene Werkstatt nehmen?</summary><p>Ja. Wir organisieren nur, du entscheidest.</p></details>
+    <details><summary>Geht das auch in meiner Sprache?</summary><p>Ja: Deutsch, Türkisch, Arabisch und Englisch, per Chat, Telefon und WhatsApp.</p></details>
+  </div>
+</div></section>
+
+<footer class="band" id="kontakt"><div class="wrap fcol">
+  <div><div class="logo" style="color:#fff">Klarfall</div><p style="margin-top:8px">Unfallabwicklung digital, für Privat und Flotten in Berlin.</p></div>
+  <div><b style="color:#fff">Kontakt</b><p style="margin-top:8px">030 555 0123 (24/7)<br>hilfe@klarfall.example<br>Musterstraße 1, 10115 Berlin</p></div>
+  <div><b style="color:#fff">Angebot</b><p style="margin-top:8px"><a href="#melden">Unfall melden</a><br><a href="/app/">App / Mein Fall</a><br><a href="#firmen">Für Firmen</a><br><a href="/portal/">Partner- &amp; Firmen-Login</a></p></div>
+  <div><b style="color:#fff">Rechtliches</b><p style="margin-top:8px"><a href="/impressum.html">Impressum</a><br><a href="/datenschutz.html">Datenschutz</a><br><a href="/garantie.html">Garantie-Bedingungen</a></p></div>
+  <p class="note" style="grid-column:1/-1;color:#94a3b8">Kontaktdaten, Flottenbeispiel und Beispielfälle bitte vor dem Start anpassen.</p>
+</div></footer>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const eur=x=>Math.round(x).toLocaleString('de-DE')+' €';
+const state={s:1,typ:'Mir ist jemand hinten drauf gefahren',rs:'Ja',ext:['Werkstatt']};
+const pick=(box,items,key,multi)=>{
+  const draw=()=>{box.innerHTML=items.map(t=>{const on=multi?state[key].includes(t):state[key]===t;return `<button type="button" class="opt" aria-pressed="${on}" data-v="${t}">${t}</button>`}).join('')};
+  box.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;const v=b.dataset.v;if(multi){state[key]=state[key].includes(v)?state[key].filter(x=>x!==v):[...state[key],v]}else state[key]=v;draw()});
+  draw();
+};
+pick($('typ'),['Mir ist jemand hinten drauf gefahren','Vorfahrt missachtet','Spurwechsel','Parken / Ausparken','Tür geöffnet','Etwas anderes'],'typ');
+pick($('rs'),['Ja','Nein','Weiß nicht'],'rs');
+pick($('ext'),['Abschleppdienst','Werkstatt','Ersatzwagen'],'ext',true);
+$('fo').addEventListener('change',()=>{const fs=[...$('fo').files].slice(0,8);$('th').innerHTML=fs.map(f=>`<img alt="Foto ${f.name.replace(/[<>"]/g,'')}" src="${URL.createObjectURL(f)}">`).join('')});
+const show=()=>{
+  document.querySelectorAll('[data-s]').forEach(d=>d.hidden=+d.dataset.s!==state.s);
+  [...$('prog').children].forEach((i,k)=>i.classList.toggle('on',k<state.s));
+  $('back').style.visibility=state.s>1&&state.s<5?'visible':'hidden';
+  $('next').textContent=state.s===4?'Unfall melden':'Weiter';
+  $('nav').hidden=state.s===5;$('err').textContent='';
+};
+$('back').addEventListener('click',()=>{state.s--;show()});
+$('f').addEventListener('submit',async ev=>{
+  ev.preventDefault();
+  if(state.s===4){
+    if(!$('nm').value.trim()||!$('tel').value.trim()){$('err').textContent='Bitte Name und Telefon angeben, damit wir dich erreichen.';return}
+    const fd=new FormData();
+    fd.append('type',state.typ);fd.append('place',$('ort').value);fd.append('opp_plate',$('kz').value);fd.append('text',$('txt').value);
+    fd.append('has_rs',state.rs);fd.append('commercial',$('gew').checked?'1':'0');
+    fd.append('needs_tow',state.ext.includes('Abschleppdienst')?'1':'0');fd.append('needs_repair',state.ext.includes('Werkstatt')?'1':'0');fd.append('needs_car',state.ext.includes('Ersatzwagen')?'1':'0');
+    fd.append('guest_name',$('nm').value);fd.append('guest_phone',$('tel').value);fd.append('guest_email',$('em').value);
+    [...$('fo').files].slice(0,20).forEach(f=>{fd.append('photos',f);fd.append('labels','Foto')});
+    const btn=$('next');btn.disabled=true;btn.textContent='Wird gesendet …';
+    let r;
+    try{const res=await fetch('/api/cases',{method:'POST',body:fd});r=await res.json();if(!res.ok)throw new Error(r.error||'Fehler')}
+    catch(e){$('err').textContent='Senden fehlgeschlagen: '+e.message+' Bitte erneut versuchen oder anrufen.';btn.disabled=false;btn.textContent='Unfall melden';return}
+    btn.disabled=false;
+    const cap=state.rs==='Ja'?'300 €':'500 €';
+    const clean=v=>String(v).replace(/[<>&"']/g,'');
+    $('done').innerHTML=`<h3>Danke, ${clean($('nm').value.trim())}. Deine Meldung ${clean(r.no)} ist bei uns.</h3>
+      <p style="margin-top:10px">Wir melden uns kurzfristig unter ${clean($('tel').value)}. Zusammenfassung: <b>${clean(state.typ)}</b>${$('kz').value?`, Gegner ${clean($('kz').value)}`:''}. ${$('fo').files.length} Foto(s). Gewünscht: ${state.ext.join(', ')||'nichts weiter'}${$('gew').checked?', Verdienstausfall':''}.</p>
+      <p style="margin-top:10px">Garantie bei späterer Teilschuld: höchstens <b>${cap}</b>.</p>
+      <p style="margin-top:10px">Den Stand verfolgen und Nachrichten schreiben: <a href="/app/">Konto in der App anlegen</a>.</p>
+      <button type="button" class="btn bg" id="again" style="margin-top:14px">Neue Meldung</button>`;
+    state.s=5;show();
+    $('again').addEventListener('click',()=>{state.s=1;$('f').reset();$('th').innerHTML='';show()});
+    return;
+  }
+  state.s++;show();
+});
+show();
+const ids=['v','u','n','t','e'];
+const def={v:60,u:0.63,n:66,t:5,e:200};
+const calc=()=>{
+  const v=+$('v').value,u=+$('u').value,n=+$('n').value/100,t=+$('t').value,e=+$('e').value;
+  $('vV').textContent=v;$('uV').textContent=u.toFixed(2).replace('.',',');$('nV').textContent=Math.round(n*100)+' %';$('tV').textContent=t+' Tage';$('eV').textContent=eur(e);
+  const acc=v*u,ok=acc*n,own=acc-ok;
+  const rows=[['Verdienstausfall gefordert',ok*t*e],['Nebenkosten vollständig',ok*300],['Weniger eigene Unfälle',own*0.3*2500],['Weniger Büroarbeit',acc*4*28]];
+  const tot=rows.reduce((a,r)=>a+r[1],0),max=Math.max(...rows.map(r=>r[1]),1);
+  $('sum').textContent=eur(tot);
+  $('bars').innerHTML=rows.map(r=>`<div class="bar"><span>${r[0]}</span><i style="width:${Math.max(2,r[1]/max*100)}%"></i><b>${eur(r[1])}</b></div>`).join('')+`<p class="mut" style="font-size:14px">${Math.round(acc)} Unfälle im Jahr, davon ${Math.round(ok)} ohne eigene Schuld.</p>`;
+};
+ids.forEach(i=>$(i).addEventListener('input',calc));
+$('reset').addEventListener('click',()=>{ids.forEach(i=>$(i).value=def[i]);calc()});
+calc();
+const car=$('car'),road=car.parentElement;
+const fit=()=>road.style.setProperty('--d',Math.max(0,road.clientWidth-80)+'px');
+const ro=new ResizeObserver(fit);ro.observe(road);fit();
+}
+</script>
+</body>
+</html>

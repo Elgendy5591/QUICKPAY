@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F4FD8">
+<link rel="manifest" href="/app/manifest.webmanifest">
+<link rel="icon" href="/assets/icon.svg">
+<title>Klarfall App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/base.css">
+<style>
+body{display:flex;justify-content:center}
+#app{width:100%;max-width:520px;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:var(--bg)}
+.top{display:flex;align-items:center;gap:12px;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 10px;background:#1F4FD8;color:#fff}
+.top b{font:700 20px 'Space Grotesk',sans-serif;flex:1}
+.top button{min-width:44px;min-height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.16);color:#fff;font:600 14px Inter,sans-serif;padding:0 12px;cursor:pointer}
+.body{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
+.foot{position:sticky;bottom:0;padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--line);display:flex;gap:8px}
+.foot .btn{flex:1}
+.hero{display:flex;flex-direction:column;gap:10px;padding:20px;border-radius:20px;background:#1F4FD8;color:#fff;border:0;text-align:left;font:inherit;cursor:pointer}
+.hero b{font:700 28px 'Space Grotesk',sans-serif}
+.it{display:flex;flex-direction:column;gap:4px;text-align:left;padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer;width:100%}
+.prog{height:6px;border-radius:3px;background:var(--line)}.prog i{display:block;height:6px;border-radius:3px;background:var(--blue)}
+.chk{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.chk input{width:22px;height:22px;margin:0;accent-color:var(--blue);flex:none}
+.cam{position:relative}.cam input{position:absolute;inset:0;opacity:0;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="app"><div class="body"><p class="mut">Wird geladen …</p></div></div>
+<script src="/assets/api.js"></script>
+<script>
+{
+const {esc,eur,dt,STATUS,pill,api,shrink,fileGrid}=KF;
+const app=document.getElementById('app');
+const TYPES=['Hinten aufgefahren (auf mich)','Ich bin aufgefahren','Vorfahrt','Spurwechsel','Parken / Ausparken','Tür geöffnet','Wildunfall','Fahrerflucht','Sonstiges'];
+const LABELS=['Vorne','Hinten','Links','Rechts','Schaden nah','Schaden weit','Kennzeichen Gegner','Unfallort','Dokument'];
+const STEPS=['Sicherheit','Unfall','Fotos','Gegner & Hergang','Optionen'];
+const localNow=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16);
+const blank=()=>({type:'',when:localNow(),place:'',own_plate:'',injured:'Nein',police:'',opp_plate:'',opp_ins:'',opp_name:'',opp_phone:'',witness:'',text:'',fault:'',has_rs:'',expert_pref:'Video',needs_tow:false,needs_repair:true,needs_car:false,commercial:false,photos:[]});
+const S={me:null,view:'home',authMode:'login',cases:[],cur:null,step:0,d:blank(),label:'Schaden nah',msg:'',busy:false};
+let poll=null;
+
+const fieldVal=(k,v)=>`value="${esc(v)}" data-f="${k}"`;
+const top=(title,back)=>`<div class="top">${back?`<button data-go="${back}" aria-label="Zurück">←</button>`:''}<b>${esc(title)}</b>${S.me&&!back?`<button data-go="account">Konto</button>`:''}</div>`;
+const msgBox=()=>S.msg?`<div class="note ${S.msg.ok?'ok':'err'}" role="status">${esc(S.msg.t)}</div>`:'';
+
+const V={
+auth:()=>`<div class="top"><b>Klarfall</b></div><div class="auth" style="width:100%"><div class="card">
+  <h1>${S.authMode==='login'?'Anmelden':'Konto anlegen'}</h1>
+  ${msgBox()}
+  <form id="authf" style="display:flex;flex-direction:column;gap:12px">
+    ${S.authMode==='register'?`<div><label class="l" for="a_name">Name</label><input id="a_name" type="text" autocomplete="name" required></div><div><label class="l" for="a_phone">Telefon / WhatsApp</label><input id="a_phone" type="tel" autocomplete="tel"></div>`:''}
+    <div><label class="l" for="a_mail">E-Mail</label><input id="a_mail" type="email" autocomplete="email" required></div>
+    <div><label class="l" for="a_pw">Passwort${S.authMode==='register'?' (mind. 8 Zeichen)':''}</label><input id="a_pw" type="password" autocomplete="${S.authMode==='login'?'current-password':'new-password'}" required></div>
+    <button class="btn wide" type="submit">${S.authMode==='login'?'Anmelden':'Konto anlegen'}</button>
+  </form>
+  <button class="btn b2 wide" data-auth="${S.authMode==='login'?'register':'login'}">${S.authMode==='login'?'Neu hier? Konto anlegen':'Ich habe schon ein Konto'}</button>
+  <p class="sm mut">Fahrer einer Partnerfirma bekommen ihren Zugang vom Büro. Unfall ohne Konto melden: <a href="/#melden">über die Webseite</a>.</p>
+</div></div>`,
+home:()=>`${top('Klarfall')}<div class="body">
+  ${msgBox()}
+  <button class="hero" data-go="new"><span class="pill" style="background:rgba(255,255,255,.18);color:#fff;align-self:flex-start">24/7</span><b>Unfall melden</b><span>Schritt für Schritt, mit Fotos. Ohne eigene Schuld zahlst du nichts.</span></button>
+  <div class="card warn"><b>Bei Verletzten: 112 · Polizei: 110</b></div>
+  <h2>Meine Fälle</h2>
+  ${S.cases.length?S.cases.map(c=>`<button class="it" data-open="${c.id}"><div class="row"><b>${esc(c.no)}</b>${pill(c.status)}</div><span class="sm">${esc(c.type)} · ${dt(c.when_ts)}</span><span class="sm mut">${esc(c.own_plate||'')} ${c.place?'· '+esc(c.place):''}</span></button>`).join(''):`<div class="card empty">Noch keine Fälle.</div>`}
+</div>`,
+new:()=>{
+  const d=S.d,n=S.step;
+  const ok=[true,!!(d.type&&d.place.trim()),d.photos.length>0,true,!!d.has_rs][n];
+  const opt=(k,items)=>`<div class="opts">${items.map(v=>`<button type="button" class="opt" data-set="${k}" data-v="${esc(v)}" aria-pressed="${d[k]===v}">${esc(v)}</button>`).join('')}</div>`;
+  const pages=[
+  ()=>`<h1>Erst sichern, dann melden</h1><div class="card" style="padding:4px 14px">${['Warnblinker an, Warnweste anziehen','Warndreieck aufstellen (innerorts ca. 50 m)','Polizei rufen bei Verletzten, Streit oder Firmenfahrzeug','Keine Schuld anerkennen, nichts unterschreiben'].map((t,i)=>`<label class="chk"${i===3?' style="border:0"':''}><input type="checkbox">${t}</label>`).join('')}</div>`,
+  ()=>`<h1>Was ist passiert?</h1>${opt('type',TYPES)}
+    <div class="two"><div><label class="l" for="f_when">Wann</label><input id="f_when" type="datetime-local" ${fieldVal('when',d.when)}></div><div><label class="l" for="f_plate">Eigenes Kennzeichen</label><input id="f_plate" type="text" autocomplete="off" ${fieldVal('own_plate',d.own_plate)}></div></div>
+    <div><label class="l" for="f_place">Wo</label><div style="display:flex;gap:8px"><input id="f_place" type="text" placeholder="Straße, Kreuzung" ${fieldVal('place',d.place)}>${navigator.geolocation?`<button type="button" class="btn b2" id="gps" style="flex:none">Standort</button>`:''}</div></div>
+    <div class="two"><div><label class="l">Verletzte?</label>${opt('injured',['Nein','Ja'])}</div><div><label class="l" for="f_pol">Polizei-Aktenzeichen</label><input id="f_pol" type="text" ${fieldVal('police',d.police)}></div></div>`,
+  ()=>{const have=new Set(d.photos.map(p=>p.label));return `<h1>Fotos</h1><p class="sm mut">Ansicht wählen, dann Foto machen. Mindestens 1, besser alle.</p>
+    <div class="opts" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr))">${LABELS.map(t=>`<button type="button" class="opt" data-lbl="${esc(t)}" aria-pressed="${S.label===t}">${have.has(t)?'✓ ':''}${esc(t)}</button>`).join('')}</div>
+    <label class="btn wide cam">Foto „${esc(S.label)}“ aufnehmen<input type="file" id="cap" accept="image/*" capture="environment"></label>
+    <label class="btn b2 wide cam">Aus Galerie wählen (mehrere)<input type="file" id="gal" accept="image/*,video/*,application/pdf" multiple></label>
+    ${fileGrid(d.photos,true)}`},
+  ()=>`<h1>Gegner &amp; Hergang</h1>
+    <div class="two"><div><label class="l" for="f_op">Kennzeichen Gegner</label><input id="f_op" type="text" autocomplete="off" ${fieldVal('opp_plate',d.opp_plate)}></div><div><label class="l" for="f_oi">Versicherung Gegner</label><input id="f_oi" type="text" ${fieldVal('opp_ins',d.opp_ins)}></div>
+    <div><label class="l" for="f_on">Name Gegner</label><input id="f_on" type="text" ${fieldVal('opp_name',d.opp_name)}></div><div><label class="l" for="f_ot">Telefon Gegner</label><input id="f_ot" type="tel" ${fieldVal('opp_phone',d.opp_phone)}></div></div>
+    <div><label class="l" for="f_wi">Zeugen</label><input id="f_wi" type="text" ${fieldVal('witness',d.witness)}></div>
+    <div><div class="row"><label class="l" for="f_tx" style="margin:0">Was ist passiert?</label>${SR?`<button type="button" class="btn b2" id="mic" style="min-height:38px">Sprechen</button>`:''}</div><textarea id="f_tx" data-f="text" style="margin-top:6px">${esc(d.text)}</textarea></div>
+    <div><label class="l">Wer ist schuld? (deine Einschätzung)</label>${opt('fault',['Der Gegner','Ich','Unklar'])}</div>`,
+  ()=>`<h1>Fast fertig</h1>
+    <div class="card"><b>Verkehrsrechtsschutz vorhanden?</b>${opt('has_rs',['Ja','Nein','Weiß nicht'])}
+    <span class="sm mut">Klarfall-Garantie: Kommt später eine Teilschuld heraus, zahlst du für Gutachter und Anwalt höchstens ${d.has_rs==='Ja'?'300 €':'500 €'}.</span></div>
+    <div class="card"><b>Gutachten</b>${opt('expert_pref',['Video','Vor Ort','Eigener Gutachter'])}</div>
+    <div class="card" style="padding:4px 14px">${[['needs_tow','Abschleppdienst'],['needs_repair','Werkstatt'],['needs_car','Ersatzfahrzeug'],['commercial','Ich fahre gewerblich (Verdienstausfall)']].map(([k,t],i,a)=>`<label class="chk"${i===a.length-1?' style="border:0"':''}><input type="checkbox" data-c="${k}"${d[k]?' checked':''}>${t}</label>`).join('')}</div>`
+  ];
+  return `${top('Unfall melden',n?null:'home')}<div class="body"><div><span class="sm mut">Schritt ${n+1} von 5 · ${STEPS[n]}</span><div class="prog"><i style="width:${(n+1)*20}%"></i></div></div>${msgBox()}${pages[n]()}</div>
+  <div class="foot">${n?`<button class="btn b2" data-step="-1">Zurück</button>`:''}<button class="btn" id="next"${ok&&!S.busy?'':' disabled'}>${S.busy?'Wird gesendet …':n===4?'Absenden':'Weiter'}</button></div>`;
+},
+case:()=>{
+  const {case:c,events,files,parties}=S.cur;
+  const i=STATUS.indexOf(c.status);
+  return `${top(c.no,'home')}<div class="body">${msgBox()}
+  <div class="card"><div class="row"><h2>${esc(c.type)}</h2>${pill(c.status)}</div>
+    <div class="steps">${STATUS.slice(0,8).map((s,k)=>`<i class="${k<=i&&i<8?'on':''}"></i>`).join('')}</div>
+    <dl class="kv"><dt>Wann</dt><dd>${dt(c.when_ts)}</dd><dt>Wo</dt><dd>${esc(c.place||'–')}</dd><dt>Fahrzeug</dt><dd>${esc(c.own_plate||'–')}</dd><dt>Gegner</dt><dd>${esc([c.opp_plate,c.opp_ins].filter(Boolean).join(' · ')||'–')}</dd>
+    ${parties.expert?`<dt>Gutachter</dt><dd>${esc(parties.expert.name)}</dd>`:''}${parties.lawyer?`<dt>Anwalt</dt><dd>${esc(parties.lawyer.name)}</dd>`:''}${parties.workshop?`<dt>Werkstatt</dt><dd>${esc(parties.workshop.name)}</dd>`:''}${parties.rental?`<dt>Ersatzwagen</dt><dd>${esc(parties.rental.name)}</dd>`:''}
+    ${c.paid_amount!=null?`<dt>Bezahlt</dt><dd>${eur(c.paid_amount)}</dd>`:''}</dl></div>
+  <div class="card"><b>Fotos &amp; Dokumente</b>${fileGrid(files,false)||'<span class="sm mut">Noch keine.</span>'}<label class="btn b2 wide cam">Nachreichen<input type="file" id="more" accept="image/*,video/*,application/pdf" multiple></label></div>
+  <div class="card"><b>Verlauf &amp; Nachrichten</b><div class="tl">${events.map(e=>`<div class="ev${e.by_name===S.me.name&&e.kind==='msg'?' me':''}"><span class="mut">${dt(e.created)} · ${esc(e.by_role==='buero'?'Klarfall-Team':e.by_name||'System')}</span><br>${esc(e.text)}</div>`).join('')}</div>
+    <form id="msgf" style="display:flex;gap:8px"><input type="text" id="msg" placeholder="Nachricht ans Team" aria-label="Nachricht"><button class="btn" type="submit">Senden</button></form></div>
+  </div>`;
+},
+account:()=>`${top('Konto','home')}<div class="body">${msgBox()}
+  <div class="card"><dl class="kv"><dt>Name</dt><dd>${esc(S.me.name)}</dd><dt>E-Mail</dt><dd>${esc(S.me.email)}</dd>${S.me.company?`<dt>Firma</dt><dd>${esc(S.me.company.name)}</dd>`:''}</dl></div>
+  <form class="card" id="pwf"><b>Passwort ändern</b><div><label class="l" for="p_old">Altes Passwort</label><input id="p_old" type="password" autocomplete="current-password"></div><div><label class="l" for="p_new">Neues Passwort</label><input id="p_new" type="password" autocomplete="new-password"></div><button class="btn" type="submit">Speichern</button></form>
+  <button class="btn b2 wide" id="logout">Abmelden</button>
+  ${['buero','firma','anwalt','gutachter','werkstatt','vermietung'].includes(S.me.role)?`<a class="btn wide" href="/portal/">Zum Portal</a>`:''}
+</div>`
+};
+
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null;
+
+const render=()=>{
+  const a=document.activeElement,id=a&&a.id,pos=a&&a.selectionStart;
+  app.innerHTML=V[S.view]();
+  if(id&&document.getElementById(id)&&/INPUT|TEXTAREA/.test(document.getElementById(id).tagName)&&document.getElementById(id).type!=='file'){const e=document.getElementById(id);e.focus();try{e.setSelectionRange(pos,pos)}catch(_){}}
+};
+const go=v=>{S.view=v;S.msg='';clearInterval(poll);if(v==='new'){S.step=0}if(v==='home')loadCases();render();window.scrollTo(0,0)};
+const loadCases=async()=>{try{S.cases=(await api('/api/cases')).cases;if(S.view==='home')render()}catch(e){}};
+const openCase=async id=>{try{S.cur=await api('/api/cases/'+id);S.view='case';S.msg='';render();window.scrollTo(0,0);clearInterval(poll);poll=setInterval(async()=>{if(S.view!=='case'||document.activeElement?.id==='msg')return;try{S.cur=await api('/api/cases/'+id);render()}catch(e){}},30000)}catch(e){S.msg={t:e.message};render()}};
+
+app.addEventListener('click',async e=>{
+  const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.go){go(t.dataset.go);return}
+  if(t.dataset.auth){S.authMode=t.dataset.auth;S.msg='';render();return}
+  if(t.dataset.open){openCase(t.dataset.open);return}
+  if(t.dataset.set){S.d[t.dataset.set]=t.dataset.v;render();return}
+  if(t.dataset.lbl){S.label=t.dataset.lbl;render();return}
+  if(t.dataset.rm){const p=S.d.photos.splice(+t.dataset.rm,1)[0];if(p?.preview)URL.revokeObjectURL(p.preview);render();return}
+  if(t.dataset.step){S.step+=+t.dataset.step;S.msg='';render();window.scrollTo(0,0);return}
+  if(t.id==='gps'){t.textContent='…';navigator.geolocation.getCurrentPosition(p=>{S.d.place=(S.d.place?S.d.place+' ':'')+`(GPS ${p.coords.latitude.toFixed(5)}, ${p.coords.longitude.toFixed(5)})`;render()},()=>{t.textContent='Standort'},{enableHighAccuracy:true,timeout:10000});return}
+  if(t.id==='mic'){
+    if(rec){rec.stop();return}
+    rec=new SR();rec.lang='de-DE';rec.continuous=true;rec.interimResults=false;
+    rec.onresult=ev=>{for(let i=ev.resultIndex;i<ev.results.length;i++)if(ev.results[i].isFinal)S.d.text=(S.d.text?S.d.text+' ':'')+ev.results[i][0].transcript.trim();const ta=document.getElementById('f_tx');if(ta)ta.value=S.d.text};
+    rec.onend=()=>{rec=null;const m=document.getElementById('mic');if(m)m.textContent='Sprechen'};
+    try{rec.start();t.textContent='Stopp'}catch(_){rec=null}
+    return;
+  }
+  if(t.id==='next'){
+    if(S.step<4){S.step++;S.msg='';render();window.scrollTo(0,0);return}
+    S.busy=true;render();
+    const d=S.d,fd=new FormData();
+    for(const k of ['type','place','own_plate','injured','police','opp_plate','opp_ins','opp_name','opp_phone','witness','text','fault','has_rs','expert_pref'])fd.append(k,d[k]);
+    fd.append('when_ts',String(new Date(d.when).getTime()||Date.now()));
+    for(const k of ['needs_tow','needs_repair','needs_car','commercial'])fd.append(k,d[k]?'1':'0');
+    d.photos.forEach(p=>{fd.append('photos',p.file);fd.append('labels',p.label)});
+    try{const r=await api('/api/cases',{method:'POST',body:fd});d.photos.forEach(p=>URL.revokeObjectURL(p.preview));S.d=blank();S.busy=false;await openCase(r.id);S.msg={ok:1,t:`Gemeldet: ${r.no}. Wir melden uns kurzfristig.`};render()}
+    catch(err){S.busy=false;S.msg={t:'Senden fehlgeschlagen: '+err.message+' Deine Eingaben sind noch da.'};render()}
+    return;
+  }
+  if(t.id==='logout'){await api('/api/auth/logout',{method:'POST'}).catch(()=>{});S.me=null;S.view='auth';S.msg='';render();return}
+});
+app.addEventListener('input',e=>{const t=e.target;if(t.dataset.f){S.d[t.dataset.f]=t.value;const nb=document.getElementById('next');if(nb&&S.step===1){const ok=!!(S.d.type&&S.d.place.trim());if(nb.disabled===ok)nb.disabled=!ok}}});
+app.addEventListener('change',async e=>{
+  const t=e.target;
+  if(t.dataset.c){S.d[t.dataset.c]=t.checked;return}
+  if((t.id==='cap'||t.id==='gal')&&t.files.length){
+    for(const f of t.files){const s=await shrink(f);S.d.photos.push({file:s,label:t.id==='cap'?S.label:(/^image/.test(f.type)?S.label:'Dokument'),preview:/^image/.test(s.type)?URL.createObjectURL(s):null,mime:s.type,original:f.name})}
+    const idx=LABELS.indexOf(S.label);const have=new Set(S.d.photos.map(p=>p.label));const nx=LABELS.slice(idx+1).concat(LABELS.slice(0,idx)).find(l=>!have.has(l)&&l!=='Dokument');if(nx)S.label=nx;
+    render();return;
+  }
+  if(t.id==='more'&&t.files.length){
+    const fd=new FormData();for(const f of t.files){fd.append('files',await shrink(f));fd.append('labels',/^image/.test(f.type)?'Nachgereicht':'Dokument')}
+    try{await api(`/api/cases/${S.cur.case.id}/files`,{method:'POST',body:fd});await openCase(S.cur.case.id);S.msg={ok:1,t:'Hochgeladen.'};render()}catch(err){S.msg={t:err.message};render()}
+  }
+});
+app.addEventListener('submit',async e=>{
+  e.preventDefault();const f=e.target;
+  if(f.id==='authf'){
+    const v=id=>document.getElementById(id)?.value||'';
+    try{
+      if(S.authMode==='login')await api('/api/auth/login',{json:{email:v('a_mail'),password:v('a_pw')}});
+      else await api('/api/auth/register',{json:{email:v('a_mail'),password:v('a_pw'),name:v('a_name'),phone:v('a_phone')}});
+      await boot();
+    }catch(err){S.msg={t:err.message};render()}
+  }
+  if(f.id==='msgf'){const i=document.getElementById('msg');const text=i.value.trim();if(!text)return;try{await api(`/api/cases/${S.cur.case.id}/events`,{json:{text}});await openCase(S.cur.case.id)}catch(err){S.msg={t:err.message};render()}}
+  if(f.id==='pwf'){try{await api('/api/me/password',{json:{old:document.getElementById('p_old').value,password:document.getElementById('p_new').value}});S.msg={ok:1,t:'Passwort geändert.'}}catch(err){S.msg={t:err.message}}render()}
+});
+
+async function boot(){
+  try{S.me=(await api('/api/me')).user}catch(e){S.me=null}
+  if(!S.me){S.view='auth';render();return}
+  S.msg='';
+  const m=location.hash.match(/^#fall-(\d+)$/);
+  if(m){await openCase(m[1]);return}
+  go('home');
+}
+boot();
+}
+</script>
+</body>
+</html>
