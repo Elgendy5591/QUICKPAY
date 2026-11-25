@@ -128,7 +128,7 @@ function vollmachtVars(c) {
   return {
     name: ct.name, telefon: ct.phone, email: ct.email, unfallzeit: c.when_ts ? fmtTs(c.when_ts) : '', ort: c.place, fall: c.no,
     kennzeichen: c.own_plate, gegner: [c.opp_plate, c.opp_ins].filter(Boolean).join(', '),
-    firma: process.env.COMPANY_NAME || 'Klarfall', garantie: c.has_rs === 'Ja' ? '300 €' : '500 €',
+    firma: process.env.COMPANY_NAME || 'Quickpay', garantie: c.has_rs === 'Ja' ? '300 €' : '500 €',
   };
 }
 async function signCase(c, dataUrl, req, userId) {
@@ -229,7 +229,7 @@ app.patch('/api/me', auth(), (req, res) => {
   if ('phone' in b) db.prepare('UPDATE users SET phone=? WHERE id=?').run(str(b.phone, 40), req.user.id);
   res.json({ ok: true });
 });
-app.get('/api/config', (req, res) => res.json({ video: video.enabled(), videoProvider: video.provider() || null, ai: ai.enabled(), channels: channels(), company: process.env.COMPANY_NAME || 'Klarfall' }));
+app.get('/api/config', (req, res) => res.json({ video: video.enabled(), videoProvider: video.provider() || null, ai: ai.enabled(), channels: channels(), company: process.env.COMPANY_NAME || 'Quickpay' }));
 
 app.post('/api/me/password', auth(), async (req, res) => {
   const { old, password } = req.body || {};
@@ -397,7 +397,7 @@ app.get('/api/cases/:id/vollmacht', auth(), (req, res) => {
 });
 app.get('/api/vollmacht-vorlage', (req, res) => {
   const b = req.query || {};
-  res.json(previewText({ name: str(b.name, 120), telefon: str(b.phone, 40), email: str(b.email, 160), unfallzeit: b.when ? fmtTs(Date.parse(b.when) || now()) : '', ort: str(b.place, 200), fall: 'wird vergeben', kennzeichen: str(b.plate, 20), gegner: str(b.opp, 120), firma: process.env.COMPANY_NAME || 'Klarfall', garantie: b.rs === 'Ja' ? '300 €' : '500 €' }));
+  res.json(previewText({ name: str(b.name, 120), telefon: str(b.phone, 40), email: str(b.email, 160), unfallzeit: b.when ? fmtTs(Date.parse(b.when) || now()) : '', ort: str(b.place, 200), fall: 'wird vergeben', kennzeichen: str(b.plate, 20), gegner: str(b.opp, 120), firma: process.env.COMPANY_NAME || 'Quickpay', garantie: b.rs === 'Ja' ? '300 €' : '500 €' }));
 });
 app.post('/api/cases/:id/sign', auth('kunde', 'fahrer', 'buero'), async (req, res) => {
   const c = getCase(req.user, Number(req.params.id));
