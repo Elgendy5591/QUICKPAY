@@ -11,7 +11,7 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "admin": "node scripts/create-admin.js",
-    "test": "node scripts/smoke-test.js"
+    "test": "node scripts/smoke-test.js && node scripts/setup-test.js"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",

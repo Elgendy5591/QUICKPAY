@@ -199,6 +199,28 @@ app.post('/api/auth/register', async (req, res) => {
   res.json({ ok: true });
 });
 
+// Ersteinrichtung: legt den ersten Büro-Zugang an, solange es noch keinen gibt.
+// Nur mit SETUP_CODE aus den Server-Einstellungen. Sobald ein Büro-Zugang existiert, ist sie gesperrt.
+const hasOffice = () => !!db.prepare("SELECT 1 FROM users WHERE role='buero' AND active=1").get();
+app.get('/api/setup', (req, res) => res.json({ needed: !hasOffice() && !!process.env.SETUP_CODE }));
+app.post('/api/setup', async (req, res) => {
+  const { code, email, name, password } = req.body || {};
+  if (hasOffice() || !process.env.SETUP_CODE) return err(res, 403, 'Die Ersteinrichtung ist schon erledigt.');
+  if (limited('setup|' + req.ip)) return err(res, 429, 'Zu viele Versuche. Bitte 15 Minuten warten.');
+  const a = Buffer.from(String(code || '')), b = Buffer.from(process.env.SETUP_CODE);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return err(res, 403, 'Einrichtungs-Code falsch.');
+  if (!email || !/^\S+@\S+\.\S+$/.test(email)) return err(res, 400, 'Bitte gültige E-Mail angeben.');
+  if (!password || String(password).length < 10) return err(res, 400, 'Passwort mindestens 10 Zeichen.');
+  if (!str(name)) return err(res, 400, 'Bitte Namen angeben.');
+  const hash = await bcrypt.hash(String(password), 11);
+  const ex = db.prepare('SELECT id FROM users WHERE email=?').get(email);
+  let id;
+  if (ex) { db.prepare("UPDATE users SET pw_hash=?, name=?, role='buero', active=1 WHERE id=?").run(hash, str(name, 120), ex.id); id = ex.id; }
+  else id = db.prepare("INSERT INTO users(email,pw_hash,name,role,created) VALUES (?,?,?,'buero',?)").run(String(email).trim(), hash, str(name, 120), now()).lastInsertRowid;
+  setSession(res, id);
+  res.json({ ok: true });
+});
+
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body || {};
   if (limited(req.ip + '|' + String(email).toLowerCase())) return err(res, 429, 'Zu viele Versuche. Bitte 15 Minuten warten.');

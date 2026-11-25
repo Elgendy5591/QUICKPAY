@@ -75,6 +75,11 @@ function extraPanels(){
   return h;
 }
 const V={
+setup:()=>`<div class="auth"><div class="card"><h1>Ersteinrichtung</h1><p class="sm">Noch gibt es keinen Büro-Zugang. Lege ihn hier einmalig an. Danach ist diese Seite gesperrt.</p>${msg()}
+  <form id="setupf" style="display:flex;flex-direction:column;gap:12px"><div><label class="l" for="s_code">Einrichtungs-Code</label><input id="s_code" type="text" autocomplete="off" required></div>
+  <div><label class="l" for="s_name">Name</label><input id="s_name" type="text" autocomplete="name" required></div>
+  <div><label class="l" for="s_mail">E-Mail</label><input id="s_mail" type="email" autocomplete="email" required></div>
+  <div><label class="l" for="s_pw">Passwort (mind. 10 Zeichen)</label><input id="s_pw" type="password" autocomplete="new-password" minlength="10" required></div><button class="btn wide">Büro-Zugang anlegen</button></form></div></div>`,
 login:()=>`<div class="auth"><div class="card"><h1>Klarfall Portal</h1><p class="sm mut">Für Büro, Firmen, Kanzleien, Sachverständige, Werkstätten und Vermieter.</p>${msg()}
   <form id="loginf" style="display:flex;flex-direction:column;gap:12px"><div><label class="l" for="l_mail">E-Mail</label><input id="l_mail" type="email" autocomplete="email" required></div>
   <div><label class="l" for="l_pw">Passwort</label><input id="l_pw" type="password" autocomplete="current-password" required></div><button class="btn wide">Anmelden</button></form>
@@ -158,7 +163,7 @@ konto:()=>`<h1>Konto</h1>${msg()}<div class="card"><dl class="kv"><dt>Name</dt><
 
 const render=()=>{
   const a=document.activeElement,id=a&&a.id,pos=a&&a.selectionStart;
-  if(!S.me){root.innerHTML=V.login();return}
+  if(!S.me){root.innerHTML=S.setup?V.setup():V.login();return}
   const view=S.route.startsWith('fall-')?'fall':S.route;
   root.innerHTML=`<div class="shell">${nav()}<main>${(V[view]||V.faelle)()}</main></div>`;
   if(id==='q'){const e=document.getElementById('q');e.focus();try{e.setSelectionRange(pos,pos)}catch(_){}}
@@ -203,6 +208,7 @@ root.addEventListener('keydown',e=>{const tr=e.target.closest&&e.target.closest(
 root.addEventListener('submit',async e=>{
   e.preventDefault();const f=e.target,v=id=>document.getElementById(id)?.value??'';
   try{
+    if(f.id==='setupf'){await api('/api/setup',{json:{code:v('s_code').trim(),name:v('s_name'),email:v('s_mail'),password:v('s_pw')}});S.setup=false;return boot()}
     if(f.id==='loginf'){await api('/api/auth/login',{json:{email:v('l_mail'),password:v('l_pw')}});return boot()}
     if(f.id==='editf'){
       const body={};['status','company_id','expert_id','lawyer_id','workshop_id','rental_id','liability','claim_no','damage_amount','claim_amount','paid_amount','days_off','note_internal'].forEach(k=>body[k]=v('e_'+k));
@@ -220,6 +226,7 @@ root.addEventListener('submit',async e=>{
 async function boot(){
   try{S.cfg=await api('/api/config')}catch(e){S.cfg={}}
   try{S.me=(await api('/api/me')).user}catch(e){S.me=null}
+  if(!S.me){try{S.setup=(await api('/api/setup')).needed}catch(e){S.setup=false}}
   if(S.me&&['kunde','fahrer'].includes(S.me.role)){location.href='/app/';return}
   S.msg='';route();
 }

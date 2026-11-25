@@ -61,6 +61,8 @@ docker compose up -d --build
 docker compose exec klarfall node scripts/create-admin.js buero@firma.de "Name" EinSicheresPasswort
 ```
 
+Ohne Zugriff auf die Kommandozeile (z. B. bei Railway): `SETUP_CODE` setzen und `/portal/` öffnen. Dort erscheint einmalig die Ersteinrichtung für den ersten Büro-Zugang.
+
 Fertig: `https://eure-domain.de`. Caddy holt das HTTPS-Zertifikat automatisch (Ports 80 und 443 müssen offen sein).
 HTTPS ist Pflicht: ohne HTTPS funktionieren Kamera, Standort und die App-Installation auf dem Handy nicht.
 
