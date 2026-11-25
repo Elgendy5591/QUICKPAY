@@ -1,4 +1,5 @@
-// Benachrichtigungen: E-Mail (SMTP), SMS und WhatsApp (Twilio).
+// Benachrichtigungen: E-Mail (Brevo-API oder SMTP), SMS und WhatsApp (Twilio).
+// Brevo nutzen, wo SMTP gesperrt ist (z. B. Railway Trial/Hobby).
 // Ohne Zugangsdaten wird nur ins Log geschrieben.
 let transport = null;
 if (process.env.SMTP_HOST) {
@@ -11,8 +12,25 @@ if (process.env.SMTP_HOST) {
   });
 }
 
+const brevoReady = () => !!process.env.BREVO_API_KEY;
+function parseFrom(v) {
+  const m = String(v || '').match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
+  return m ? { name: m[1].replace(/^"|"$/g, '') || 'Klarfall', email: m[2] } : { name: 'Klarfall', email: String(v || '').trim() };
+}
 async function sendMail(to, subject, text) {
   if (!to) return false;
+  if (brevoReady()) {
+    try {
+      const api = (process.env.BREVO_API_URL || 'https://api.brevo.com').replace(/\/$/, '');
+      const r = await fetch(api + '/v3/smtp/email', {
+        method: 'POST',
+        headers: { 'api-key': process.env.BREVO_API_KEY, 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({ sender: parseFrom(process.env.MAIL_FROM), to: [{ email: to }], subject, textContent: text }),
+      });
+      if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
+      return true;
+    } catch (e) { console.error('[mail] Brevo-Fehler:', e.message); return false; }
+  }
   if (!transport) { console.log(`[mail] an ${to}: ${subject}`); return false; }
   try { await transport.sendMail({ from: process.env.MAIL_FROM || 'Klarfall <noreply@example.com>', to, subject, text }); return true; }
   catch (e) { console.error('[mail] Fehler:', e.message); return false; }
@@ -66,7 +84,7 @@ async function sendWhatsApp(phone, text, vars = {}) {
   }
 }
 
-const channels = () => ({ email: !!transport, sms: twilioReady() && !!process.env.TWILIO_SMS_FROM, whatsapp: twilioReady() && !!process.env.TWILIO_WHATSAPP_FROM });
+const channels = () => ({ email: !!transport || brevoReady(), sms: twilioReady() && !!process.env.TWILIO_SMS_FROM, whatsapp: twilioReady() && !!process.env.TWILIO_WHATSAPP_FROM });
 
 // Kurze Texte für Kunden in ihrer Sprache
 const T = {

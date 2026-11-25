@@ -102,7 +102,7 @@ Alles läuft auch ohne diese Konten. Jede Funktion schaltet sich ein, sobald die
 
 | Funktion | Was ihr braucht | Werte in `.env` |
 |---|---|---|
-| **E-Mail** | SMTP-Zugang eures Mail-Anbieters | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` |
+| **E-Mail** | SMTP-Zugang eures Mail-Anbieters – oder Brevo (nötig bei Railway, dort ist SMTP gesperrt) | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` – oder `BREVO_API_KEY`, `MAIL_FROM` |
 | **SMS** | Twilio-Konto mit Nummer oder Absendername | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_SMS_FROM` |
 | **WhatsApp** | Twilio WhatsApp-Absender (Meta-Freigabe) und eine genehmigte Vorlage mit Variable `{{1}}` | `TWILIO_WHATSAPP_FROM`, `TWILIO_WA_TEMPLATE_SID` |
 | **Video-Gutachten** | Jitsi (kostenlos, sofort), Daily.co oder Whereby | `VIDEO_PROVIDER` und `JITSI_DOMAIN` bzw. `DAILY_API_KEY` bzw. `WHEREBY_API_KEY` |
