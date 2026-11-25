@@ -1,0 +1,17 @@
+# Vorlage für die digitale Vollmacht. Platzhalter in {geschweiften Klammern} werden automatisch ersetzt.
+# Zeilen mit # werden ignoriert. Leere Zeile = neuer Absatz. Text bitte von eurem Anwalt prüfen lassen.
+TITEL: Vollmacht, Abtretung und Auftrag zur Schadenregulierung
+
+Ich, {name}, {telefon}, {email}, beauftrage im Zusammenhang mit dem Verkehrsunfall vom {unfallzeit} in {ort} (Fall {fall}, Fahrzeug {kennzeichen}, Unfallgegner {gegner}) Folgendes:
+
+1. Vollmacht: Ich bevollmächtige die von {firma} vermittelte Rechtsanwaltskanzlei, meine Ansprüche aus dem Unfall gegenüber dem Unfallgegner und dessen Haftpflichtversicherung außergerichtlich und gerichtlich geltend zu machen.
+
+2. Sachverständiger: Ich beauftrage einen unabhängigen Kfz-Sachverständigen mit der Erstellung eines Schadengutachtens.
+
+3. Sicherungsabtretung: Zur Sicherung der Sachverständigenkosten trete ich meinen Anspruch auf Erstattung der Gutachterkosten gegen den Unfallgegner und dessen Haftpflichtversicherung erfüllungshalber an den beauftragten Sachverständigen ab.
+
+4. Datenweitergabe: Ich bin einverstanden, dass {firma} meine Angaben, Fotos und Dokumente zu diesem Fall an die beauftragten Partner (Kanzlei, Sachverständiger, Werkstatt, Autovermietung) weitergibt.
+
+5. Garantie: Es gelten die Garantie-Bedingungen von {firma}. Mein Eigenanteil bei nachträglich festgestellter Mitschuld beträgt höchstens {garantie}, sofern meine Angaben wahrheitsgemäß sind.
+
+Ich versichere, dass meine Angaben zum Unfall wahrheitsgemäß sind.

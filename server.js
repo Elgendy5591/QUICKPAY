@@ -6,7 +6,11 @@ const express = require('express');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const { db, DATA_DIR } = require('./src/db');
-const { sendMail } = require('./src/notify');
+const { sendMail, notifyCustomer, channels } = require('./src/notify');
+const { makeVollmacht, previewText } = require('./src/pdf');
+const video = require('./src/video');
+const ai = require('./src/ai');
+const LANGS = ['de', 'tr', 'ar', 'en'];
 
 const PORT = Number(process.env.PORT || 3000);
 const PROD = process.env.NODE_ENV === 'production';
@@ -22,7 +26,7 @@ const PARTNER = { anwalt: 'lawyer_id', gutachter: 'expert_id', werkstatt: 'works
 const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
-app.use(express.json({ limit: '200kb' }));
+app.use(express.json({ limit: '1mb' }));
 
 // Sicherheits-Header
 app.use((req, res, next) => {
@@ -97,6 +101,11 @@ function caseNo() {
 function publicCase(c, user) {
   const out = { ...c };
   if (user.role !== 'buero') delete out.note_internal;
+  delete out.video_room;
+  let a = null; try { a = c.ai_json ? JSON.parse(c.ai_json) : null; } catch (e) {}
+  delete out.ai_json;
+  if (a) out.ai = ['kunde', 'fahrer'].includes(user.role) ? { kosten_von: a.kosten_von, kosten_bis: a.kosten_bis, video_reicht: a.video_reicht, fehlende_fotos: a.fehlende_fotos } : a;
+  if (!['buero', 'gutachter'].includes(user.role)) delete out.ai_status;
   return out;
 }
 function userName(id) {
@@ -106,10 +115,51 @@ function userName(id) {
 }
 function contactOf(c) {
   if (c.customer_id) {
-    const u = db.prepare('SELECT name,email,phone FROM users WHERE id=?').get(c.customer_id);
+    const u = db.prepare('SELECT name,email,phone,notify_channel AS channel,lang FROM users WHERE id=?').get(c.customer_id);
     return u || {};
   }
-  return { name: c.guest_name, email: c.guest_email, phone: c.guest_phone };
+  return { name: c.guest_name, email: c.guest_email, phone: c.guest_phone, channel: c.guest_email ? 'email' : 'sms', lang: c.lang || 'de' };
+}
+const appLink = c => `${BASE_URL}/app/#fall-${c.id}`;
+const fmtTs = ts => new Date(ts).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+function vollmachtVars(c) {
+  const ct = contactOf(c);
+  return {
+    name: ct.name, telefon: ct.phone, email: ct.email, unfallzeit: c.when_ts ? fmtTs(c.when_ts) : '', ort: c.place, fall: c.no,
+    kennzeichen: c.own_plate, gegner: [c.opp_plate, c.opp_ins].filter(Boolean).join(', '),
+    firma: process.env.COMPANY_NAME || 'Klarfall', garantie: c.has_rs === 'Ja' ? '300 €' : '500 €',
+  };
+}
+async function signCase(c, dataUrl, req, userId) {
+  const m = /^data:image\/png;base64,([A-Za-z0-9+/=]+)$/.exec(String(dataUrl || ''));
+  if (!m) throw Object.assign(new Error('Unterschrift fehlt.'), { status: 400 });
+  const png = Buffer.from(m[1], 'base64');
+  if (png.length < 200 || png.length > 600 * 1024) throw Object.assign(new Error('Unterschrift ungültig.'), { status: 400 });
+  const ts = now();
+  const pdf = await makeVollmacht(vollmachtVars(c), png, { ts, ip: req.ip, ua: req.headers['user-agent'] });
+  const fname = crypto.randomBytes(16).toString('hex') + '.pdf';
+  fs.writeFileSync(path.join(UPLOAD_DIR, fname), pdf.buffer);
+  db.prepare('INSERT INTO files(case_id,label,filename,original,mime,size,uploaded_by,created) VALUES (?,?,?,?,?,?,?,?)').run(c.id, 'Vollmacht (unterschrieben)', fname, `Vollmacht-${c.no}.pdf`, 'application/pdf', pdf.buffer.length, userId || null, ts);
+  db.prepare('UPDATE cases SET signed_at=? WHERE id=?').run(ts, c.id);
+  addEvent(c.id, userId || null, `Vollmacht digital unterschrieben (Prüfsumme ${pdf.hash.slice(0, 12)}…).`, 'sys');
+}
+const aiRunning = new Set();
+async function runAI(caseId) {
+  if (!ai.enabled() || aiRunning.has(caseId)) return;
+  aiRunning.add(caseId);
+  db.prepare("UPDATE cases SET ai_status='läuft' WHERE id=?").run(caseId);
+  try {
+    const c = db.prepare('SELECT * FROM cases WHERE id=?').get(caseId);
+    const files = db.prepare('SELECT * FROM files WHERE case_id=? ORDER BY created').all(caseId);
+    const out = await ai.analyse(c, files, UPLOAD_DIR);
+    db.prepare("UPDATE cases SET ai_json=?, ai_at=?, ai_status='fertig' WHERE id=?").run(JSON.stringify(out), now(), caseId);
+    const hint = out.video_reicht === false || out.totalschaden_moeglich ? ' Empfehlung: Vor-Ort-Termin.' : ' Video-Gutachten reicht voraussichtlich.';
+    addEvent(caseId, null, `KI-Ersteinschätzung: ${out.schwere || '?'}, ca. ${out.kosten_von ?? '?'}–${out.kosten_bis ?? '?'} € netto.${hint}${out.plausibel === false ? ' Achtung: Schaden passt evtl. nicht zur Beschreibung.' : ''}`, 'sys', 1);
+  } catch (e) {
+    console.error('[ki]', e.message);
+    db.prepare("UPDATE cases SET ai_status=? WHERE id=?").run('Fehler: ' + e.message.slice(0, 150), caseId);
+  } finally { aiRunning.delete(caseId); }
 }
 
 // einfache Begrenzung für Login-Versuche
@@ -127,7 +177,7 @@ const upload = multer({
     destination: UPLOAD_DIR,
     filename: (req, file, cb) => cb(null, crypto.randomBytes(16).toString('hex') + path.extname(file.originalname || '').toLowerCase().replace(/[^.a-z0-9]/g, '').slice(0, 6)),
   }),
-  limits: { fileSize: 50 * 1024 * 1024, files: 20 },
+  limits: { fileSize: 50 * 1024 * 1024, files: 20, fieldSize: 1.5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => cb(null, ALLOWED.includes(file.mimetype)),
 });
 function saveFiles(caseId, files, labels, userId) {
@@ -137,13 +187,14 @@ function saveFiles(caseId, files, labels, userId) {
 
 /* ------------------------------ Auth ------------------------------ */
 app.post('/api/auth/register', async (req, res) => {
-  const { email, password, name, phone } = req.body || {};
+  const { email, password, name, phone, lang } = req.body || {};
   if (!email || !/^\S+@\S+\.\S+$/.test(email)) return err(res, 400, 'Bitte gültige E-Mail angeben.');
   if (!password || String(password).length < 8) return err(res, 400, 'Passwort mindestens 8 Zeichen.');
   if (!str(name)) return err(res, 400, 'Bitte Namen angeben.');
   if (db.prepare('SELECT 1 FROM users WHERE email=?').get(email)) return err(res, 409, 'Diese E-Mail ist schon registriert.');
   const hash = await bcrypt.hash(String(password), 11);
   const r = db.prepare('INSERT INTO users(email,pw_hash,name,phone,role,created) VALUES (?,?,?,?,?,?)').run(String(email).trim(), hash, str(name, 120), str(phone, 40), 'kunde', now());
+  if (LANGS.includes(lang)) db.prepare('UPDATE users SET lang=? WHERE id=?').run(lang, r.lastInsertRowid);
   setSession(res, r.lastInsertRowid);
   res.json({ ok: true });
 });
@@ -166,9 +217,19 @@ app.post('/api/auth/logout', (req, res) => {
 app.get('/api/me', (req, res) => {
   if (!req.user) return res.json({ user: null });
   const { id, email, name, phone, role, company_id } = req.user;
+  const extra = db.prepare('SELECT notify_channel,lang FROM users WHERE id=?').get(id);
   const company = company_id ? db.prepare('SELECT id,name FROM companies WHERE id=?').get(company_id) : null;
-  res.json({ user: { id, email, name, phone, role, company } });
+  res.json({ user: { id, email, name, phone, role, company, ...extra } });
 });
+
+app.patch('/api/me', auth(), (req, res) => {
+  const b = req.body || {};
+  if ('notify_channel' in b && ['email', 'sms', 'whatsapp'].includes(b.notify_channel)) db.prepare('UPDATE users SET notify_channel=? WHERE id=?').run(b.notify_channel, req.user.id);
+  if ('lang' in b && LANGS.includes(b.lang)) db.prepare('UPDATE users SET lang=? WHERE id=?').run(b.lang, req.user.id);
+  if ('phone' in b) db.prepare('UPDATE users SET phone=? WHERE id=?').run(str(b.phone, 40), req.user.id);
+  res.json({ ok: true });
+});
+app.get('/api/config', (req, res) => res.json({ video: video.enabled(), videoProvider: video.provider() || null, ai: ai.enabled(), channels: channels(), company: process.env.COMPANY_NAME || 'Klarfall' }));
 
 app.post('/api/me/password', auth(), async (req, res) => {
   const { old, password } = req.body || {};
@@ -183,7 +244,7 @@ app.post('/api/me/password', auth(), async (req, res) => {
 app.get('/api/meta', (req, res) => res.json({ status: STATUS, roles: ROLES }));
 
 // Neuer Fall: angemeldet (App) oder als Gast (Webseite)
-app.post('/api/cases', upload.array('photos', 20), (req, res) => {
+app.post('/api/cases', upload.array('photos', 20), async (req, res) => {
   const b = req.body || {};
   const u = req.user;
   if (!str(b.type)) return err(res, 400, 'Bitte Unfallart angeben.');
@@ -199,14 +260,17 @@ app.post('/api/cases', upload.array('photos', 20), (req, res) => {
     str(b.opp_plate, 20)?.toUpperCase(), str(b.opp_ins, 120), str(b.opp_name, 120), str(b.opp_phone, 40), str(b.witness, 300),
     str(b.text, 4000), str(b.fault, 20), str(b.has_rs, 20), bool(b.commercial) || (u && u.role === 'fahrer' ? 1 : 0),
     bool(b.needs_tow), bool(b.needs_repair), bool(b.needs_car), str(b.expert_pref, 20));
+  if (LANGS.includes(b.lang)) db.prepare('UPDATE cases SET lang=? WHERE id=?').run(b.lang, r.lastInsertRowid);
   const id = r.lastInsertRowid;
   saveFiles(id, req.files, b.labels, u?.id);
   addEvent(id, u?.id || null, u ? 'Unfall gemeldet.' : 'Unfall über die Webseite gemeldet.', 'sys');
   const c = db.prepare('SELECT * FROM cases WHERE id=?').get(id);
+  let signed = false;
+  if (b.signature) { try { await signCase(c, b.signature, req, u?.id); signed = true; } catch (e) { console.error('[vollmacht]', e.message); } }
   sendMail(OFFICE_EMAIL, `Neuer Unfall ${c.no}`, `${c.type} · ${c.place || ''}\n${BASE_URL}/portal/#fall-${id}`);
-  const ct = contactOf(c);
-  sendMail(ct.email, `Ihre Unfallmeldung ${c.no}`, `Danke, wir haben Ihre Meldung erhalten und melden uns kurzfristig.\nStatus: ${BASE_URL}/app/`);
-  res.json({ ok: true, id, no: c.no });
+  notifyCustomer(contactOf(c), 'received', [c.no], u ? appLink(c) : null);
+  if (req.files?.length) setImmediate(() => runAI(id));
+  res.json({ ok: true, id, no: c.no, signed });
 });
 
 app.get('/api/cases', auth(), (req, res) => {
@@ -262,6 +326,7 @@ app.patch('/api/cases/:id', auth('buero'), (req, res) => {
     expert_id: num, lawyer_id: num, workshop_id: num, rental_id: num,
     claim_no: v => str(v, 80), damage_amount: num, claim_amount: num, paid_amount: num, days_off: num,
     liability: v => str(v, 40), note_internal: v => str(v, 4000), company_id: num,
+    video_at: v => (v ? (typeof v === 'number' ? v : Date.parse(v)) || null : null),
   };
   const set = [], args = [];
   for (const [k, fn] of Object.entries(fields)) if (k in b) { set.push(`${k}=?`); args.push(fn(b[k])); }
@@ -277,8 +342,12 @@ app.patch('/api/cases/:id', auth('buero'), (req, res) => {
   const n = db.prepare('SELECT * FROM cases WHERE id=?').get(c.id);
   if (n.status !== c.status) {
     addEvent(c.id, req.user.id, `Status: ${n.status}`, 'status');
-    const ct = contactOf(n);
-    sendMail(ct.email, `Ihr Fall ${n.no}: ${n.status}`, `Neuer Stand Ihres Falls: ${n.status}\n${BASE_URL}/app/`);
+    notifyCustomer(contactOf(n), 'status', [n.no, n.status], n.customer_id ? appLink(n) : null);
+  }
+  if (n.video_at && n.video_at !== c.video_at) {
+    addEvent(c.id, req.user.id, `Videotermin: ${fmtTs(n.video_at)}`, 'sys');
+    notifyCustomer(contactOf(n), 'video', [n.no, fmtTs(n.video_at)], n.customer_id ? appLink(n) : null);
+    const ex = userName(n.expert_id); if (ex) sendMail(ex.email, `Videotermin ${n.no}`, `${fmtTs(n.video_at)}\n${BASE_URL}/portal/#fall-${n.id}`);
   }
   for (const [role, col] of Object.entries(PARTNER)) {
     if (n[col] && n[col] !== c[col]) {
@@ -298,7 +367,7 @@ app.post('/api/cases/:id/events', auth(), (req, res) => {
   const internal = req.user.role === 'buero' && bool(req.body.internal) ? 1 : 0;
   addEvent(c.id, req.user.id, text, 'msg', internal);
   if (req.user.role !== 'buero') sendMail(OFFICE_EMAIL, `Nachricht zu ${c.no}`, `${req.user.name}: ${text}\n${BASE_URL}/portal/#fall-${c.id}`);
-  else if (!internal) sendMail(contactOf(c).email, `Nachricht zu Ihrem Fall ${c.no}`, `${text}\n${BASE_URL}/app/`);
+  else if (!internal) notifyCustomer(contactOf(c), 'msg', [c.no], c.customer_id ? appLink(c) : null);
   res.json({ ok: true });
 });
 
@@ -318,6 +387,46 @@ app.get('/files/:id', auth(), (req, res) => {
   res.setHeader('Cache-Control', 'private, max-age=86400');
   if (req.query.download) res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(f.original || 'datei')}"`);
   fs.createReadStream(path.join(UPLOAD_DIR, path.basename(f.filename))).on('error', () => res.status(404).end()).pipe(res);
+});
+
+// Vollmacht: Vorschau und Unterschrift (Kunde/Fahrer des Falls oder Büro)
+app.get('/api/cases/:id/vollmacht', auth(), (req, res) => {
+  const c = getCase(req.user, Number(req.params.id));
+  if (!c) return err(res, 404, 'Fall nicht gefunden.');
+  res.json({ ...previewText(vollmachtVars(c)), signed_at: c.signed_at });
+});
+app.get('/api/vollmacht-vorlage', (req, res) => {
+  const b = req.query || {};
+  res.json(previewText({ name: str(b.name, 120), telefon: str(b.phone, 40), email: str(b.email, 160), unfallzeit: b.when ? fmtTs(Date.parse(b.when) || now()) : '', ort: str(b.place, 200), fall: 'wird vergeben', kennzeichen: str(b.plate, 20), gegner: str(b.opp, 120), firma: process.env.COMPANY_NAME || 'Klarfall', garantie: b.rs === 'Ja' ? '300 €' : '500 €' }));
+});
+app.post('/api/cases/:id/sign', auth('kunde', 'fahrer', 'buero'), async (req, res) => {
+  const c = getCase(req.user, Number(req.params.id));
+  if (!c) return err(res, 404, 'Fall nicht gefunden.');
+  if (c.signed_at) return err(res, 409, 'Vollmacht ist bereits unterschrieben.');
+  try { await signCase(c, (req.body || {}).signature, req, req.user.id); res.json({ ok: true }); }
+  catch (e) { err(res, e.status || 500, e.message); }
+});
+
+// Videocall
+app.post('/api/cases/:id/video', auth('kunde', 'fahrer', 'buero', 'gutachter', 'anwalt'), async (req, res) => {
+  const c = getCase(req.user, Number(req.params.id));
+  if (!c) return err(res, 404, 'Fall nicht gefunden.');
+  if (!video.enabled()) return err(res, 400, 'Videocall ist noch nicht eingerichtet.');
+  try {
+    let created = false;
+    const url = await video.joinUrl(c, req.user, room => { db.prepare('UPDATE cases SET video_room=? WHERE id=?').run(room, c.id); created = true; });
+    if (created) addEvent(c.id, req.user.id, 'Videoraum für diesen Fall eröffnet.', 'sys');
+    res.json({ url });
+  } catch (e) { err(res, 502, e.message); }
+});
+
+// KI-Analyse neu starten
+app.post('/api/cases/:id/ai', auth('buero', 'gutachter'), (req, res) => {
+  const c = getCase(req.user, Number(req.params.id));
+  if (!c) return err(res, 404, 'Fall nicht gefunden.');
+  if (!ai.enabled()) return err(res, 400, 'KI ist nicht eingerichtet (ANTHROPIC_API_KEY).');
+  runAI(c.id);
+  res.json({ ok: true });
 });
 
 app.get('/api/export.csv', auth('buero', 'firma'), (req, res) => {

@@ -1,0 +1,24 @@
+{
+  "name": "klarfall-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Klarfall als App für Google Play und App Store (Capacitor-Hülle um die Web-App)",
+  "scripts": {
+    "add:android": "cap add android",
+    "add:ios": "cap add ios",
+    "assets": "capacitor-assets generate --iconBackgroundColor '#1F4FD8' --splashBackgroundColor '#1F4FD8'",
+    "sync": "cap sync",
+    "android": "cap open android",
+    "ios": "cap open ios",
+    "permissions": "node permissions.js"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/ios": "^8.6.2"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.6.2"
+  }
+}

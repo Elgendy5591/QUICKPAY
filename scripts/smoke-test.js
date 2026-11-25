@@ -2,14 +2,32 @@
 const os = require('os'), path = require('path'), fs = require('fs');
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'klarfall-test-'));
 process.env.PORT = '0';
+const http = require('http');
 const bcrypt = require('bcryptjs');
-const app = require('../server');
-const { db } = require('../src/db');
+let app, db;
+
+// Nachgebaute externe Dienste (KI, Twilio, Daily), damit der Test ohne echte Konten läuft
+const calls = { ai: 0, twilio: [], daily: 0 };
+const mock = http.createServer((req, res) => {
+  let body = ''; req.on('data', d => body += d); req.on('end', () => {
+    res.setHeader('content-type', 'application/json');
+    if (req.url === '/v1/messages') { calls.ai++; const j = JSON.parse(body); calls.aiImages = j.messages[0].content.filter(c => c.type === 'image').length;
+      return res.end(JSON.stringify({ content: [{ type: 'text', text: '{"teile":[{"teil":"Stoßfänger hinten","schaden":"Delle","massnahme":"erneuern"}],"schwere":"mittel","kosten_von":2500,"kosten_bis":4000,"totalschaden_moeglich":false,"video_reicht":true,"plausibel":true,"auffaelligkeiten":[],"fehlende_fotos":["Kennzeichen Gegner"],"zusammenfassung":"Test."}' }] })); }
+    if (req.url.includes('/Messages.json')) { calls.twilio.push(Object.fromEntries(new URLSearchParams(body))); return res.end('{"sid":"SM1"}'); }
+    if (req.url === '/v1/rooms') { calls.daily++; return res.end('{"url":"https://test.daily.co/raum1","name":"raum1"}'); }
+    if (req.url === '/v1/meeting-tokens') return res.end('{"token":"tok123"}');
+    res.statusCode = 404; res.end('{}');
+  });
+});
 
 let fails = 0;
 const ok = (cond, msg) => { console.log((cond ? '  ✓ ' : '  ✗ ') + msg); if (!cond) fails++; };
 
 (async () => {
+  await new Promise(r => mock.listen(0, r));
+  const m = `http://127.0.0.1:${mock.address().port}`;
+  Object.assign(process.env, { ANTHROPIC_API_KEY: 'test', ANTHROPIC_API_URL: m, TWILIO_ACCOUNT_SID: 'AC1', TWILIO_AUTH_TOKEN: 't', TWILIO_SMS_FROM: '+4930000', TWILIO_WHATSAPP_FROM: '+4930001', TWILIO_API_URL: m, VIDEO_PROVIDER: 'daily', DAILY_API_KEY: 'k', DAILY_API_URL: m + '/v1' });
+  app = require('../server'); db = require('../src/db').db;
   const srv = app.listen(0);
   const base = `http://127.0.0.1:${srv.address().port}`;
   const client = () => {
@@ -100,7 +118,57 @@ const ok = (cond, msg) => { console.log((cond ? '  ✓ ' : '  ✗ ') + msg); if 
   ok((await cust('/api/cases')).body.cases.length === 0, 'Neuer Kunde sieht keine fremden Fälle');
   ok((await cust('/api/users')).status === 403, 'Kunde hat keinen Admin-Zugriff');
 
-  srv.close();
+  console.log('Vollmacht');
+  const { deflateSync } = require('zlib');
+  const png = (() => { const w = 120, h = 60, raw = require("crypto").randomBytes((w * 4 + 1) * h); const crc = b => { let c, t = []; for (let n = 0; n < 256; n++) { c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } let x = 0xffffffff; for (const v of b) x = t[(x ^ v) & 255] ^ (x >>> 8); return (x ^ 0xffffffff) >>> 0; };
+    const chunk = (type, data) => { const len = Buffer.alloc(4); len.writeUInt32BE(data.length); const td = Buffer.concat([Buffer.from(type), data]); const c = Buffer.alloc(4); c.writeUInt32BE(crc(td)); return Buffer.concat([len, td, c]); };
+    const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = 6;
+    for (let y = 0; y < h; y++) raw[y * (w * 4 + 1)] = 0;
+    return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]); })();
+  const sig = 'data:image/png;base64,' + png.toString('base64');
+  ok((await drv('/api/cases/' + c.id + '/vollmacht')).body.paras?.length > 3, 'Vollmacht-Text mit Falldaten');
+  ok((await drv('/api/cases/' + c.id + '/sign', { json: { signature: sig } })).status === 200, 'Fahrer unterschreibt Vollmacht');
+  ok((await drv('/api/cases/' + c.id + '/sign', { json: { signature: sig } })).status === 409, 'Doppelt unterschreiben verhindert');
+  const vf = (await office('/api/cases/' + c.id)).body.files.find(f => f.label === 'Vollmacht (unterschrieben)');
+  const pdf = await fetch(`${base}/files/${vf.id}`, { headers: { cookie: '' } });
+  ok(vf && vf.mime === 'application/pdf', 'Vollmacht-PDF im Fall gespeichert');
+  const fdS = new FormData(); fdS.append('type', 'Vorfahrt'); fdS.append('guest_name', 'Şükrü Ğüneş'); fdS.append('guest_phone', '01701234567'); fdS.append('signature', sig);
+  ok((await guest('/api/cases', { method: 'POST', body: fdS })).body.signed === true, 'Unterschrift direkt bei Meldung (mit türkischen Zeichen)');
+
+  console.log('KI');
+  const fdA = new FormData(); fdA.append('type', 'Spurwechsel'); fdA.append('photos', new Blob([Buffer.from([0xff, 0xd8, 0xff, 0xd9])], { type: 'image/jpeg' }), 'x.jpg'); fdA.append('labels', 'Hinten');
+  const ca = (await drv('/api/cases', { method: 'POST', body: fdA })).body;
+  await new Promise(r => setTimeout(r, 400));
+  const ad = (await office('/api/cases/' + ca.id)).body.case;
+  ok(calls.ai >= 1 && calls.aiImages === 1, 'Fotos an KI gesendet');
+  ok(ad.ai && ad.ai.kosten_bis === 4000 && ad.ai_status === 'fertig', 'KI-Ergebnis im Fall (Büro)');
+  const cd = (await drv('/api/cases/' + ca.id)).body.case;
+  ok(cd.ai && cd.ai.kosten_von === 2500 && !cd.ai.zusammenfassung, 'Kunde sieht nur Kostenrahmen');
+
+  console.log('Video');
+  const v1 = await drv('/api/cases/' + c.id + '/video', { method: 'POST' });
+  ok(v1.status === 200 && v1.body.url.startsWith('https://test.daily.co/raum1?t='), 'Daily-Raum für Fahrer');
+  const v2 = await gut('/api/cases/' + c.id + '/video', { method: 'POST' });
+  ok(v2.status === 200 && calls.daily === 1, 'Gutachter im selben Raum');
+  ok((await firm('/api/cases/' + c.id + '/video', { method: 'POST' })).status === 403, 'Firma startet keinen Videocall');
+  process.env.VIDEO_PROVIDER = 'jitsi'; process.env.JITSI_DOMAIN = 'meet.example.de'; process.env.JITSI_APP_ID = 'kf'; process.env.JITSI_APP_SECRET = 's';
+  const vj = await office('/api/cases/' + ca.id + '/video', { method: 'POST' });
+  ok(vj.body.url && vj.body.url.startsWith('https://meet.example.de/klarfall-') && vj.body.url.includes('jwt='), 'Jitsi mit Token');
+  ok((await office('/api/cases/' + c.id, { method: 'PATCH', json: { video_at: '2026-12-01T10:00' } })).status === 200, 'Videotermin gesetzt');
+
+  console.log('SMS & WhatsApp');
+  calls.twilio = [];
+  await drv('/api/me', { method: 'PATCH', json: { notify_channel: 'whatsapp', phone: '0170 1234567', lang: 'tr' } });
+  await office('/api/cases/' + c.id, { method: 'PATCH', json: { status: 'An Anwalt' } });
+  await new Promise(r => setTimeout(r, 200));
+  const wa = calls.twilio.find(t => t.To === 'whatsapp:+491701234567');
+  ok(wa && /yeni durumu/.test(wa.Body), 'WhatsApp an Fahrer auf Türkisch');
+  calls.twilio = [];
+  await guest('/api/cases', { method: 'POST', body: (() => { const f = new FormData(); f.append('type', 'Vorfahrt'); f.append('guest_name', 'G'); f.append('guest_phone', '0301234567'); return f; })() });
+  await new Promise(r => setTimeout(r, 200));
+  ok(calls.twilio.some(t => t.To === '+49301234567' && /eingegangen/.test(t.Body)), 'SMS-Bestätigung an Gast ohne E-Mail');
+
+  srv.close(); mock.close();
   console.log(fails ? `\n${fails} Test(s) fehlgeschlagen` : '\nAlle Tests bestanden');
   process.exit(fails ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

@@ -1,13 +1,20 @@
 {
+  "id": "/app/",
   "name": "Klarfall – Unfall melden",
   "short_name": "Klarfall",
+  "description": "Unfall melden, Fotos, Vollmacht, Video-Gutachten und Status – alles in einer App.",
   "start_url": "/app/",
   "scope": "/app/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#f4f6fa",
   "theme_color": "#1F4FD8",
   "lang": "de",
+  "categories": ["auto", "business", "utilities"],
   "icons": [
-    { "src": "/assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]
 }

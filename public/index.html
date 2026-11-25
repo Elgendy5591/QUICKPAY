@@ -6,8 +6,11 @@
 <title>Klarfall Webseite</title>
 <link rel="icon" href="/assets/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+.sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+[dir=rtl] body,[dir=rtl] h1,[dir=rtl] h2,[dir=rtl] h3,[dir=rtl] .btn,[dir=rtl] input,[dir=rtl] textarea,[dir=rtl] select{font-family:'Noto Sans Arabic',Inter,sans-serif;letter-spacing:0}
+[dir=rtl] .logo{margin-right:0;margin-left:auto}
 /* VOICE occasion, calm and trustworthy: help after a crash
    IDEA a route map from crash to payout, each station a service
    PICTURE a road across the blue hero with a car and five stations
@@ -96,15 +99,15 @@ footer{background:#0F172A;color:#cbd5e1}footer a{color:#cbd5e1}
 <body>
 <nav aria-label="Hauptnavigation"><div class="wrap">
   <a class="logo" href="#top"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg></i>Klarfall</a>
-  <div class="nl"><a href="#ablauf">So geht's</a><a href="#melden">Unfall melden</a><a href="#firmen">Für Firmen</a><a href="#partner">Für Partner</a><a href="#fragen">Fragen</a><a href="/app/">Mein Fall</a><a href="/portal/">Partner-Login</a></div>
-  <label for="lang" style="position:absolute;left:-9999px">Sprache</label>
-  <select id="lang"><option>Deutsch</option><option>Türkçe</option><option>العربية</option><option>English</option></select>
+  <div class="nl"><a href="#ablauf" data-t="t1">So geht's</a><a href="#melden" data-t="t2">Unfall melden</a><a href="#firmen" data-t="t3">Für Firmen</a><a href="#partner" data-t="t4">Für Partner</a><a href="#fragen" data-t="t5">Fragen</a><a href="/app/" data-t="t6">Mein Fall</a><a href="/portal/" data-t="t7">Partner-Login</a></div>
+  <label for="lang" class="sr" data-t="t8">Sprache</label>
+  <select id="lang"><option value="de">Deutsch</option><option value="tr">Türkçe</option><option value="ar">العربية</option><option value="en">English</option></select>
 </div></nav>
 
 <header class="hero band" id="top"><div class="wrap">
-  <h1>Unfall gehabt? Wir regeln alles, du zahlst nichts.</h1>
-  <p class="lead">Melde den Unfall in 3 Minuten. Ein unabhängiger Gutachter sieht sich den Schaden in rund 60 Minuten per Video an. Anwalt, Werkstatt und Ersatzwagen organisieren wir – bei unverschuldetem Unfall zahlt die Versicherung des Gegners.</p>
-  <div class="cta"><a class="btn b1" href="#melden">Unfall jetzt melden</a><a class="btn b2" href="#firmen">Lösung für Flotten</a></div>
+  <h1 data-t="t9">Unfall gehabt? Wir regeln alles, du zahlst nichts.</h1>
+  <p class="lead" data-t="t10">Melde den Unfall in 3 Minuten. Ein unabhängiger Gutachter sieht sich den Schaden in rund 60 Minuten per Video an. Anwalt, Werkstatt und Ersatzwagen organisieren wir – bei unverschuldetem Unfall zahlt die Versicherung des Gegners.</p>
+  <div class="cta"><a class="btn b1" href="#melden" data-t="t11">Unfall jetzt melden</a><a class="btn b2" href="#firmen" data-t="t12">Lösung für Flotten</a></div>
   <div class="road" aria-hidden="true">
     <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
       <path d="M0 78 C200 40 320 110 520 72 S860 40 1200 70" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="26" stroke-linecap="round"/>
@@ -115,91 +118,91 @@ footer{background:#0F172A;color:#cbd5e1}footer a{color:#cbd5e1}
     <svg id="car" viewBox="0 0 70 34" style="position:absolute;left:0;top:34px;width:70px;height:34px;animation:drive 9s ease-in-out infinite alternate"><path d="M4 26 8 15q3-6 11-7h26q8 0 13 7l6 2q4 1 4 5v4z" fill="#fff"/><path d="M17 15l4-5h12v5zM37 10h8q5 1 8 5H37z" fill="#1F4FD8" opacity=".55"/><circle cx="18" cy="27" r="6" fill="#0F172A"/><circle cx="52" cy="27" r="6" fill="#0F172A"/></svg>
   </div>
   <div class="st">
-    <div><b>3 Min.</b><span>Unfall melden, mit KI-Fotohilfe</span></div>
-    <div><b>60 Min.</b><span>Gutachten per Video</span></div>
-    <div><b>1 Tag</b><span>Anwalt meldet alle Ansprüche an</span></div>
-    <div><b>Werkstatt</b><span>Reparatur und Ersatzwagen</span></div>
-    <div class="ok"><b>0 €</b><span>Auszahlung, ohne Vorkasse</span></div>
+    <div><b data-t="t13">3 Min.</b><span data-t="t14">Unfall melden, mit KI-Fotohilfe</span></div>
+    <div><b data-t="t15">60 Min.</b><span data-t="t16">Gutachten per Video</span></div>
+    <div><b data-t="t17">1 Tag</b><span data-t="t18">Anwalt meldet alle Ansprüche an</span></div>
+    <div><b data-t="t19">Werkstatt</b><span data-t="t20">Reparatur und Ersatzwagen</span></div>
+    <div class="ok"><b>0 €</b><span data-t="t21">Auszahlung, ohne Vorkasse</span></div>
   </div>
 </div></header>
 
 <section class="band" id="ablauf"><div class="wrap">
-  <h2>So läuft es ab</h2>
-  <p class="mut" style="margin-top:10px;max-width:60ch">Alles in der App oder hier im Browser. Du siehst jederzeit, wo dein Fall steht – auf Deutsch, Türkisch, Arabisch oder Englisch.</p>
+  <h2 data-t="t22">So läuft es ab</h2>
+  <p class="mut" style="margin-top:10px;max-width:60ch" data-t="t23">Alles in der App oder hier im Browser. Du siehst jederzeit, wo dein Fall steht – auf Deutsch, Türkisch, Arabisch oder Englisch.</p>
   <div class="grid3">
-    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7h3l2-3h8l2 3h3v13H3z"/><circle cx="12" cy="13" r="4"/></svg></span><h3>Melden &amp; fotografieren</h3><p class="mut">Die KI zeigt dir, welche Fotos fehlen, liest das Kennzeichen und findet die Versicherung des Gegners.</p></div>
-    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span><h3>Schuld-Check</h3><p class="mut">Eine Fachanwältin für Verkehrsrecht prüft kurz, ob der Gegner haftet. Erst dann entstehen Kosten – für die Gegenseite.</p></div>
-    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3"/></svg></span><h3>Gutachten</h3><p class="mut">Kleine Schäden per Videocall, große vor Ort. Unabhängige Sachverständige, nicht die der gegnerischen Versicherung.</p></div>
-    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v4h4M9 14l2 2 4-4"/></svg></span><h3>Vollmacht digital</h3><p class="mut">Einmal mit dem Finger unterschreiben. Gutachter und Werkstatt rechnen direkt mit der Versicherung ab.</p></div>
-    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 17h2l2-6h7l3 6h4M7 17a2 2 0 1 0 4 0M15 17a2 2 0 1 0 4 0"/></svg></span><h3>Abschleppen, Werkstatt, Ersatzwagen</h3><p class="mut">Unsere Partner sind rund um die Uhr erreichbar. Deine Wunschwerkstatt geht natürlich auch.</p></div>
-    <div class="card"><span class="ic" style="color:var(--green);background:color-mix(in srgb,var(--green) 14%,transparent)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><h3>Live-Status bis zur Auszahlung</h3><p class="mut">Jedes Schreiben, jede Zahlung, jeder Schritt – sichtbar, ohne Warteschleife.</p></div>
+    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7h3l2-3h8l2 3h3v13H3z"/><circle cx="12" cy="13" r="4"/></svg></span><h3 data-t="t24">Melden &amp; fotografieren</h3><p class="mut" data-t="t25">Die KI zeigt dir, welche Fotos fehlen, liest das Kennzeichen und findet die Versicherung des Gegners.</p></div>
+    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span><h3 data-t="t26">Schuld-Check</h3><p class="mut" data-t="t27">Eine Fachanwältin für Verkehrsrecht prüft kurz, ob der Gegner haftet. Erst dann entstehen Kosten – für die Gegenseite.</p></div>
+    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3"/></svg></span><h3 data-t="t28">Gutachten</h3><p class="mut" data-t="t29">Kleine Schäden per Videocall, große vor Ort. Unabhängige Sachverständige, nicht die der gegnerischen Versicherung.</p></div>
+    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v4h4M9 14l2 2 4-4"/></svg></span><h3 data-t="t30">Vollmacht digital</h3><p class="mut" data-t="t31">Einmal mit dem Finger unterschreiben. Gutachter und Werkstatt rechnen direkt mit der Versicherung ab.</p></div>
+    <div class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 17h2l2-6h7l3 6h4M7 17a2 2 0 1 0 4 0M15 17a2 2 0 1 0 4 0"/></svg></span><h3 data-t="t32">Abschleppen, Werkstatt, Ersatzwagen</h3><p class="mut" data-t="t33">Unsere Partner sind rund um die Uhr erreichbar. Deine Wunschwerkstatt geht natürlich auch.</p></div>
+    <div class="card"><span class="ic" style="color:var(--green);background:color-mix(in srgb,var(--green) 14%,transparent)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><h3 data-t="t34">Live-Status bis zur Auszahlung</h3><p class="mut" data-t="t35">Jedes Schreiben, jede Zahlung, jeder Schritt – sichtbar, ohne Warteschleife.</p></div>
   </div>
 </div></section>
 
 <section class="band soft"><div class="wrap two">
   <div>
-    <h2>Was dir nach einem unverschuldeten Unfall zusteht</h2>
-    <p class="mut" style="margin-top:12px">Viele bekommen weniger, als ihnen zusteht, weil sie die Abwicklung der gegnerischen Versicherung überlassen. Wir fordern alles.</p>
+    <h2 data-t="t36">Was dir nach einem unverschuldeten Unfall zusteht</h2>
+    <p class="mut" style="margin-top:12px" data-t="t37">Viele bekommen weniger, als ihnen zusteht, weil sie die Abwicklung der gegnerischen Versicherung überlassen. Wir fordern alles.</p>
     <div class="list">
-      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span><b>Reparatur</b> oder Wiederbeschaffungswert</span></div>
-      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span><b>Eigener Gutachter</b> ab etwa 750 € Schaden</span></div>
-      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span><b>Eigener Anwalt</b>, bezahlt von der Gegenseite</span></div>
-      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span><b>Wertminderung</b>, weil ein Unfallauto weniger wert ist</span></div>
-      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span><b>Ersatzwagen oder Nutzungsausfall</b> pro Tag</span></div>
-      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span><b>Verdienstausfall</b> für Taxi, Mietwagen und Gewerbe</span></div>
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span data-t="r1"><b>Reparatur</b> oder Wiederbeschaffungswert</span></div>
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span data-t="r2"><b>Eigener Gutachter</b> ab etwa 750 € Schaden</span></div>
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span data-t="r3"><b>Eigener Anwalt</b>, bezahlt von der Gegenseite</span></div>
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span data-t="r4"><b>Wertminderung</b>, weil ein Unfallauto weniger wert ist</span></div>
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span data-t="r5"><b>Ersatzwagen oder Nutzungsausfall</b> pro Tag</span></div>
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><span data-t="r6"><b>Verdienstausfall</b> für Taxi, Mietwagen und Gewerbe</span></div>
     </div>
   </div>
   <div class="card" style="gap:14px">
-    <h3>Klarfall-Garantie</h3>
-    <p>Stellt sich später doch eine Teilschuld heraus und du hast ehrlich gemeldet, zahlst du für Gutachter und Anwalt höchstens einen festen Betrag. Den Rest tragen wir.</p>
+    <h3 data-t="t44">Klarfall-Garantie</h3>
+    <p data-t="t45">Stellt sich später doch eine Teilschuld heraus und du hast ehrlich gemeldet, zahlst du für Gutachter und Anwalt höchstens einen festen Betrag. Den Rest tragen wir.</p>
     <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px">
-      <div style="padding:16px;border-radius:14px;background:var(--soft)"><span class="mut" style="font-size:14px">mit Verkehrsrechtsschutz</span><div class="res" style="font-size:clamp(30px,4vw,42px);color:var(--blue)">max. 300 €</div></div>
-      <div style="padding:16px;border-radius:14px;background:var(--soft)"><span class="mut" style="font-size:14px">ohne Verkehrsrechtsschutz</span><div class="res" style="font-size:clamp(30px,4vw,42px);color:var(--blue)">max. 500 €</div></div>
+      <div style="padding:16px;border-radius:14px;background:var(--soft)"><span class="mut" style="font-size:14px" data-t="t46">mit Verkehrsrechtsschutz</span><div class="res" style="font-size:clamp(30px,4vw,42px);color:var(--blue)">max. 300 €</div></div>
+      <div style="padding:16px;border-radius:14px;background:var(--soft)"><span class="mut" style="font-size:14px" data-t="t47">ohne Verkehrsrechtsschutz</span><div class="res" style="font-size:clamp(30px,4vw,42px);color:var(--blue)">max. 500 €</div></div>
     </div>
-    <p class="note">Bei eigener Hauptschuld helfen wir dir mit deiner Kasko und einer günstigen Partnerwerkstatt. Allgemeine Informationen, keine Rechtsberatung.</p>
+    <p class="note" data-t="t48">Bei eigener Hauptschuld helfen wir dir mit deiner Kasko und einer günstigen Partnerwerkstatt. Allgemeine Informationen, keine Rechtsberatung.</p>
   </div>
 </div></section>
 
 <section class="band" id="melden"><div class="wrap two">
   <div>
-    <h2>Unfall melden</h2>
-    <p class="mut" style="margin-top:12px;max-width:46ch">Vier kurze Schritte. Danach meldet sich ein Mensch aus unserem Team – in deiner Sprache.</p>
+    <h2 data-t="t49">Unfall melden</h2>
+    <p class="mut" style="margin-top:12px;max-width:46ch" data-t="t50">Vier kurze Schritte. Danach meldet sich ein Mensch aus unserem Team – in deiner Sprache.</p>
     <div class="list">
-      <div><b style="min-width:5.5em">Verletzte?</b><span>Ruf zuerst 112. Polizei: 110.</span></div>
-      <div><b style="min-width:5.5em">Wichtig</b><span>Keine Schuld anerkennen und nichts unterschreiben.</span></div>
-      <div><b style="min-width:5.5em">Hotline</b><span>24/7 unter 030 555 0123 · auch per WhatsApp</span></div>
+      <div><b style="min-width:5.5em" data-t="t51">Verletzte?</b><span data-t="t52">Ruf zuerst 112. Polizei: 110.</span></div>
+      <div><b style="min-width:5.5em" data-t="t53">Wichtig</b><span data-t="t54">Keine Schuld anerkennen und nichts unterschreiben.</span></div>
+      <div><b style="min-width:5.5em" data-t="t55">Hotline</b><span data-t="t56">24/7 unter 030 555 0123 · auch per WhatsApp</span></div>
     </div>
   </div>
   <form class="form" id="f" novalidate>
     <div class="prog" id="prog"><i class="on"></i><i></i><i></i><i></i></div>
     <div data-s="1">
-      <label>Was ist passiert?</label>
+      <label data-t="t57">Was ist passiert?</label>
       <div class="opts" id="typ"></div>
-      <div style="margin-top:14px"><label for="ort">Wo und wann?</label><input id="ort" type="text" placeholder="z. B. Kantstraße 120, heute 8:40"></div>
+      <div style="margin-top:14px"><label for="ort" data-t="t58">Wo und wann?</label><input id="ort" type="text" placeholder="z. B. Kantstraße 120, heute 8:40"></div>
     </div>
     <div data-s="2" hidden>
-      <label for="kz">Kennzeichen des Unfallgegners</label><input id="kz" type="text" placeholder="B-AB 1234" autocomplete="off">
-      <div style="margin-top:14px"><label for="fo">Fotos vom Schaden und vom Unfallort</label><input id="fo" type="file" accept="image/*" multiple style="font:15px Inter,sans-serif"></div>
+      <label for="kz" data-t="t59">Kennzeichen des Unfallgegners</label><input id="kz" type="text" placeholder="B-AB 1234" autocomplete="off">
+      <div style="margin-top:14px"><label for="fo" data-t="t60">Fotos vom Schaden und vom Unfallort</label><input id="fo" type="file" accept="image/*" multiple style="font:15px Inter,sans-serif"></div>
       <div class="thumbs" id="th" style="margin-top:10px"></div>
-      <div style="margin-top:14px"><label for="txt">Kurz beschreiben (optional)</label><textarea id="txt" placeholder="Ich stand an der Ampel, der andere ist aufgefahren."></textarea></div>
+      <div style="margin-top:14px"><label for="txt" data-t="t61">Kurz beschreiben (optional)</label><textarea id="txt" placeholder="Ich stand an der Ampel, der andere ist aufgefahren."></textarea></div>
     </div>
     <div data-s="3" hidden>
-      <label>Hast du eine Verkehrsrechtsschutzversicherung?</label>
+      <label data-t="t62">Hast du eine Verkehrsrechtsschutzversicherung?</label>
       <div class="opts" id="rs" style="grid-template-columns:repeat(3,minmax(0,1fr))"></div>
-      <label style="margin-top:14px">Was brauchst du?</label>
+      <label style="margin-top:14px" data-t="t63">Was brauchst du?</label>
       <div class="opts" id="ext"></div>
-      <label style="margin-top:14px;display:flex;gap:10px;align-items:center;font-weight:500"><input id="gew" type="checkbox" style="width:22px;height:22px;accent-color:var(--blue)">Ich fahre gewerblich (Taxi, Mietwagen, Uber/Bolt)</label>
+      <label style="margin-top:14px;display:flex;gap:10px;align-items:center;font-weight:500"><input id="gew" type="checkbox" style="width:22px;height:22px;accent-color:var(--blue)"><span id="gewt">Ich fahre gewerblich (Taxi, Mietwagen, Uber/Bolt)</span></label>
     </div>
     <div data-s="4" hidden>
       <div style="display:grid;gap:12px">
-        <div><label for="nm">Name</label><input id="nm" type="text" autocomplete="name"></div>
-        <div><label for="tel">Telefon oder WhatsApp</label><input id="tel" type="tel" autocomplete="tel"></div>
-        <div><label for="em">E-Mail (optional)</label><input id="em" type="email" autocomplete="email"></div>
+        <div><label for="nm" data-t="t64">Name</label><input id="nm" type="text" autocomplete="name"></div>
+        <div><label for="tel" data-t="t65">Telefon oder WhatsApp</label><input id="tel" type="tel" autocomplete="tel"></div>
+        <div><label for="em" data-t="t66">E-Mail (optional)</label><input id="em" type="email" autocomplete="email"></div>
       </div>
     </div>
     <div data-s="5" hidden id="done"></div>
     <p class="note" id="err" role="alert" style="color:#b42318;min-height:1em"></p>
-    <div class="row" id="nav"><button type="button" class="btn bg" id="back">Zurück</button><button type="submit" class="btn bp" id="next">Weiter</button></div>
+    <div class="row" id="nav"><button type="button" class="btn bg" id="back" data-t="t67">Zurück</button><button type="submit" class="btn bp" id="next" data-t="t68">Weiter</button></div>
   </form>
 </div></section>
 
@@ -249,75 +252,94 @@ footer{background:#0F172A;color:#cbd5e1}footer a{color:#cbd5e1}
 </div></section>
 
 <section class="band soft" id="fragen"><div class="wrap two">
-  <h2>Häufige Fragen</h2>
+  <h2 data-t="t69">Häufige Fragen</h2>
   <div>
-    <details open><summary>Was kostet mich das?</summary><p>Bei einem Unfall ohne eigene Schuld nichts. Die Haftpflichtversicherung des Verursachers zahlt Gutachter, Anwalt, Reparatur und Ersatzwagen.</p></details>
-    <details><summary>Und wenn ich teilweise schuld bin?</summary><p>Dann werden die Kosten nach der Haftungsquote geteilt. Mit der Klarfall-Garantie zahlst du für Gutachter und Anwalt höchstens 300 € (mit Rechtsschutz) oder 500 € (ohne).</p></details>
-    <details><summary>Muss ich etwas vorstrecken?</summary><p>Nein. Gutachter, Werkstatt und Vermieter rechnen direkt mit der Versicherung ab.</p></details>
-    <details><summary>Kann ich meine eigene Werkstatt nehmen?</summary><p>Ja. Wir organisieren nur, du entscheidest.</p></details>
-    <details><summary>Geht das auch in meiner Sprache?</summary><p>Ja: Deutsch, Türkisch, Arabisch und Englisch, per Chat, Telefon und WhatsApp.</p></details>
+    <details open><summary data-t="t70">Was kostet mich das?</summary><p data-t="t71">Bei einem Unfall ohne eigene Schuld nichts. Die Haftpflichtversicherung des Verursachers zahlt Gutachter, Anwalt, Reparatur und Ersatzwagen.</p></details>
+    <details><summary data-t="t72">Und wenn ich teilweise schuld bin?</summary><p data-t="t73">Dann werden die Kosten nach der Haftungsquote geteilt. Mit der Klarfall-Garantie zahlst du für Gutachter und Anwalt höchstens 300 € (mit Rechtsschutz) oder 500 € (ohne).</p></details>
+    <details><summary data-t="t74">Muss ich etwas vorstrecken?</summary><p data-t="t75">Nein. Gutachter, Werkstatt und Vermieter rechnen direkt mit der Versicherung ab.</p></details>
+    <details><summary data-t="t76">Kann ich meine eigene Werkstatt nehmen?</summary><p data-t="t77">Ja. Wir organisieren nur, du entscheidest.</p></details>
+    <details><summary data-t="t78">Geht das auch in meiner Sprache?</summary><p data-t="t79">Ja: Deutsch, Türkisch, Arabisch und Englisch, per Chat, Telefon und WhatsApp.</p></details>
   </div>
 </div></section>
 
 <footer class="band" id="kontakt"><div class="wrap fcol">
-  <div><div class="logo" style="color:#fff">Klarfall</div><p style="margin-top:8px">Unfallabwicklung digital, für Privat und Flotten in Berlin.</p></div>
-  <div><b style="color:#fff">Kontakt</b><p style="margin-top:8px">030 555 0123 (24/7)<br>hilfe@klarfall.example<br>Musterstraße 1, 10115 Berlin</p></div>
-  <div><b style="color:#fff">Angebot</b><p style="margin-top:8px"><a href="#melden">Unfall melden</a><br><a href="/app/">App / Mein Fall</a><br><a href="#firmen">Für Firmen</a><br><a href="/portal/">Partner- &amp; Firmen-Login</a></p></div>
-  <div><b style="color:#fff">Rechtliches</b><p style="margin-top:8px"><a href="/impressum.html">Impressum</a><br><a href="/datenschutz.html">Datenschutz</a><br><a href="/garantie.html">Garantie-Bedingungen</a></p></div>
-  <p class="note" style="grid-column:1/-1;color:#94a3b8">Kontaktdaten, Flottenbeispiel und Beispielfälle bitte vor dem Start anpassen.</p>
+  <div><div class="logo" style="color:#fff">Klarfall</div><p style="margin-top:8px" data-t="t80">Unfallabwicklung digital, für Privat und Flotten in Berlin.</p></div>
+  <div><b style="color:#fff" data-t="t81">Kontakt</b><p style="margin-top:8px">030 555 0123 (24/7)<br>hilfe@klarfall.example<br>Musterstraße 1, 10115 Berlin</p></div>
+  <div><b style="color:#fff" data-t="t83">Angebot</b><p style="margin-top:8px"><a href="#melden" data-t="t84">Unfall melden</a><br><a href="/app/" data-t="t85">App / Mein Fall</a><br><a href="#firmen" data-t="t86">Für Firmen</a><br><a href="/portal/" data-t="t87">Partner- &amp; Firmen-Login</a></p></div>
+  <div><b style="color:#fff" data-t="t88">Rechtliches</b><p style="margin-top:8px"><a href="/impressum.html" data-t="t89">Impressum</a><br><a href="/datenschutz.html" data-t="t90">Datenschutz</a><br><a href="/garantie.html" data-t="t91">Garantie-Bedingungen</a></p></div>
+  <p class="note" style="grid-column:1/-1;color:#94a3b8" data-t="t92">Kontaktdaten, Flottenbeispiel und Beispielfälle bitte vor dem Start anpassen.</p>
 </div></footer>
 
+<script src="/assets/i18n-site.js"></script>
 <script>
 {
 const $=id=>document.getElementById(id);
 const eur=x=>Math.round(x).toLocaleString('de-DE')+' €';
-const state={s:1,typ:'Mir ist jemand hinten drauf gefahren',rs:'Ja',ext:['Werkstatt']};
-const pick=(box,items,key,multi)=>{
-  const draw=()=>{box.innerHTML=items.map(t=>{const on=multi?state[key].includes(t):state[key]===t;return `<button type="button" class="opt" aria-pressed="${on}" data-v="${t}">${t}</button>`}).join('')};
+const SITE=window.KF_SITE,DEJS=SITE.de.js;
+const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+let lang=(store.get('kf_lang')||navigator.language||'de').slice(0,2);if(!SITE[lang])lang='de';
+const J=()=>SITE[lang].js||DEJS;
+const state={s:1,typ:DEJS.types[0],rs:DEJS.rs[0],ext:[DEJS.ext[1]]};
+const pickers=[];
+const pick=(box,key,arr,multi)=>{
+  // Werte bleiben deutsch (gehen so an den Server), angezeigt wird die Übersetzung
+  const draw=()=>{const L=J()[arr];box.innerHTML=DEJS[arr].map((v,i)=>{const on=multi?state[key].includes(v):state[key]===v;return `<button type="button" class="opt" aria-pressed="${on}" data-v="${v}">${L[i]}</button>`}).join('')};
   box.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;const v=b.dataset.v;if(multi){state[key]=state[key].includes(v)?state[key].filter(x=>x!==v):[...state[key],v]}else state[key]=v;draw()});
-  draw();
+  pickers.push(draw);draw();
 };
-pick($('typ'),['Mir ist jemand hinten drauf gefahren','Vorfahrt missachtet','Spurwechsel','Parken / Ausparken','Tür geöffnet','Etwas anderes'],'typ');
-pick($('rs'),['Ja','Nein','Weiß nicht'],'rs');
-pick($('ext'),['Abschleppdienst','Werkstatt','Ersatzwagen'],'ext',true);
-$('fo').addEventListener('change',()=>{const fs=[...$('fo').files].slice(0,8);$('th').innerHTML=fs.map(f=>`<img alt="Foto ${f.name.replace(/[<>"]/g,'')}" src="${URL.createObjectURL(f)}">`).join('')});
+pick($('typ'),'typ','types');
+pick($('rs'),'rs','rs');
+pick($('ext'),'ext','ext',true);
+const orig={};
+function applyLang(l){
+  lang=SITE[l]?l:'de';store.set('kf_lang',lang);
+  document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+  const D=SITE[lang];
+  document.querySelectorAll('[data-t]').forEach(el=>{const k=el.dataset.t;if(!(k in orig))orig[k]=el.innerHTML;el.innerHTML=(lang!=='de'&&D[k])||orig[k]});
+  $('lang').value=lang;$('gewt').textContent=J().commercial;$('ort').placeholder=J().ort_ph;$('txt').placeholder=J().txt_ph;
+  pickers.forEach(d=>d());show();
+}
+$('lang').addEventListener('change',e=>applyLang(e.target.value));
+const tx=(k,...a)=>{const v=J()[k];return typeof v==='function'?v(...a):v};
+$('fo').addEventListener('change',()=>{const fs=[...$('fo').files].slice(0,8);$('th').innerHTML=fs.map(f=>`<img alt="${f.name.replace(/[<>"]/g,'')}" src="${URL.createObjectURL(f)}">`).join('')});
 const show=()=>{
   document.querySelectorAll('[data-s]').forEach(d=>d.hidden=+d.dataset.s!==state.s);
   [...$('prog').children].forEach((i,k)=>i.classList.toggle('on',k<state.s));
   $('back').style.visibility=state.s>1&&state.s<5?'visible':'hidden';
-  $('next').textContent=state.s===4?'Unfall melden':'Weiter';
+  $('next').textContent=state.s===4?tx('send'):tx('next');
   $('nav').hidden=state.s===5;$('err').textContent='';
 };
 $('back').addEventListener('click',()=>{state.s--;show()});
 $('f').addEventListener('submit',async ev=>{
   ev.preventDefault();
   if(state.s===4){
-    if(!$('nm').value.trim()||!$('tel').value.trim()){$('err').textContent='Bitte Name und Telefon angeben, damit wir dich erreichen.';return}
+    if(!$('nm').value.trim()||!$('tel').value.trim()){$('err').textContent=tx('need');return}
     const fd=new FormData();
     fd.append('type',state.typ);fd.append('place',$('ort').value);fd.append('opp_plate',$('kz').value);fd.append('text',$('txt').value);
-    fd.append('has_rs',state.rs);fd.append('commercial',$('gew').checked?'1':'0');
-    fd.append('needs_tow',state.ext.includes('Abschleppdienst')?'1':'0');fd.append('needs_repair',state.ext.includes('Werkstatt')?'1':'0');fd.append('needs_car',state.ext.includes('Ersatzwagen')?'1':'0');
+    fd.append('has_rs',state.rs);fd.append('commercial',$('gew').checked?'1':'0');fd.append('lang',lang);
+    fd.append('needs_tow',state.ext.includes(DEJS.ext[0])?'1':'0');fd.append('needs_repair',state.ext.includes(DEJS.ext[1])?'1':'0');fd.append('needs_car',state.ext.includes(DEJS.ext[2])?'1':'0');
     fd.append('guest_name',$('nm').value);fd.append('guest_phone',$('tel').value);fd.append('guest_email',$('em').value);
     [...$('fo').files].slice(0,20).forEach(f=>{fd.append('photos',f);fd.append('labels','Foto')});
-    const btn=$('next');btn.disabled=true;btn.textContent='Wird gesendet …';
+    const btn=$('next');btn.disabled=true;btn.textContent=tx('sending');
     let r;
-    try{const res=await fetch('/api/cases',{method:'POST',body:fd});r=await res.json();if(!res.ok)throw new Error(r.error||'Fehler')}
-    catch(e){$('err').textContent='Senden fehlgeschlagen: '+e.message+' Bitte erneut versuchen oder anrufen.';btn.disabled=false;btn.textContent='Unfall melden';return}
+    try{const res=await fetch('/api/cases',{method:'POST',body:fd});r=await res.json();if(!res.ok)throw new Error(r.error||'Error')}
+    catch(e){$('err').textContent=tx('fail',e.message);btn.disabled=false;btn.textContent=tx('send');return}
     btn.disabled=false;
-    const cap=state.rs==='Ja'?'300 €':'500 €';
+    const cap=state.rs===DEJS.rs[0]?'300 €':'500 €';
     const clean=v=>String(v).replace(/[<>&"']/g,'');
-    $('done').innerHTML=`<h3>Danke, ${clean($('nm').value.trim())}. Deine Meldung ${clean(r.no)} ist bei uns.</h3>
-      <p style="margin-top:10px">Wir melden uns kurzfristig unter ${clean($('tel').value)}. Zusammenfassung: <b>${clean(state.typ)}</b>${$('kz').value?`, Gegner ${clean($('kz').value)}`:''}. ${$('fo').files.length} Foto(s). Gewünscht: ${state.ext.join(', ')||'nichts weiter'}${$('gew').checked?', Verdienstausfall':''}.</p>
-      <p style="margin-top:10px">Garantie bei späterer Teilschuld: höchstens <b>${cap}</b>.</p>
-      <p style="margin-top:10px">Den Stand verfolgen und Nachrichten schreiben: <a href="/app/">Konto in der App anlegen</a>.</p>
-      <button type="button" class="btn bg" id="again" style="margin-top:14px">Neue Meldung</button>`;
+    const tr=(arr,v)=>J()[arr][DEJS[arr].indexOf(v)]||v;
+    $('done').innerHTML=`<h3>${clean(tx('thanks',$('nm').value.trim(),r.no))}</h3>
+      <p style="margin-top:10px">${clean(tx('reach',$('tel').value))} ${tx('summary')}: <b>${clean(tr('types',state.typ))}</b>${$('kz').value?`, ${tx('opp')} ${clean($('kz').value)}`:''}. ${$('fo').files.length} ${tx('photos')}. ${tx('wanted')}: ${state.ext.map(v=>tr('ext',v)).join(', ')||tx('nothing')}${$('gew').checked?', '+tx('loss'):''}.</p>
+      <p style="margin-top:10px">${tx('guarantee')} <b>${cap}</b>.</p>
+      <p style="margin-top:10px">${tx('follow')} <a href="/app/">${tx('account')}</a>.</p>
+      <button type="button" class="btn bg" id="again" style="margin-top:14px">${tx('again')}</button>`;
     state.s=5;show();
     $('again').addEventListener('click',()=>{state.s=1;$('f').reset();$('th').innerHTML='';show()});
     return;
   }
   state.s++;show();
 });
-show();
+applyLang(lang);
 const ids=['v','u','n','t','e'];
 const def={v:60,u:0.63,n:66,t:5,e:200};
 const calc=()=>{

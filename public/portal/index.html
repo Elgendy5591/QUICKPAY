@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/base.css">
 <style>
+.sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .shell{display:flex;flex-wrap:wrap;min-height:100vh}
 aside{flex:1 1 230px;max-width:250px;background:#0F172A;color:#cbd5e1;padding:20px 12px;display:flex;flex-direction:column;gap:4px}
 aside .logo{font:700 19px 'Space Grotesk',sans-serif;color:#fff;padding:0 10px 4px}
@@ -40,7 +41,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:var(--soft)}
 const {esc,eur,dt,STATUS,pill,api,shrink,fileGrid}=KF;
 const root=document.getElementById('root');
 const ROLE_NAME={buero:'Büro',firma:'Firma',anwalt:'Kanzlei',gutachter:'Sachverständiger',werkstatt:'Werkstatt',vermietung:'Autovermietung',kunde:'Kunde',fahrer:'Fahrer'};
-const S={me:null,route:'faelle',cases:[],stats:null,filter:'open',q:'',cur:null,users:[],companies:[],partners:[],msg:'',created:null};
+const S={cfg:{},me:null,route:'faelle',cases:[],stats:null,filter:'open',q:'',cur:null,users:[],companies:[],partners:[],msg:'',created:null};
 
 const nav=()=>{
   const r=S.me.role,items=[['faelle',r==='buero'||r==='firma'?'Fälle':'Meine Aufträge']];
@@ -53,6 +54,26 @@ const nav=()=>{
 };
 const msg=()=>S.msg?`<div class="note ${S.msg.ok?'ok':'err'}" role="status">${esc(S.msg.t)}</div>`:'';
 
+
+function extraPanels(){
+  const {case:c,files}=S.cur,role=S.me.role;
+  const vdoc=files.find(f=>f.label==='Vollmacht (unterschrieben)');
+  let h=`<div class="card"><h2>Vollmacht</h2>${c.signed_at?`<span>Unterschrieben am ${dt(c.signed_at)}</span>${vdoc?`<a href="/files/${vdoc.id}" target="_blank" rel="noopener">PDF öffnen</a>`:''}`:`<span class="pill" style="align-self:flex-start;background:#FEF3C7;color:#92400E">Noch nicht unterschrieben</span><span class="sm mut">Der Kunde kann in der App unterschreiben.</span>`}</div>`;
+  if(S.cfg.video&&['buero','gutachter','anwalt'].includes(role)){
+    h+=`<div class="card noprint"><h2>Video-Gutachten</h2><span class="sm">${c.video_at?'Termin: '+dt(c.video_at):'Kein Termin eingetragen.'}</span><button class="btn" id="video">Videocall starten</button></div>`;
+  }
+  if(['buero','gutachter'].includes(role)&&(S.cfg.ai||c.ai)){
+    const a=c.ai,L=x=>Array.isArray(x)?x.map(o=>o&&typeof o==='object'?[o.teil,[o.schaden,o.massnahme].filter(Boolean).join(', ')].filter(Boolean).join(': '):o).join(' · '):(x||''),yn=x=>x===true?'Ja':x===false?'Nein':'–';
+    h+=`<div class="card"><div class="row"><h2>KI-Ersteinschätzung</h2>${c.ai_status?`<span class="pill">${esc(c.ai_status)}</span>`:''}</div>
+    ${a?`<dl class="kv"><dt>Kosten</dt><dd>${eur(a.kosten_von)} – ${eur(a.kosten_bis)}</dd><dt>Schwere</dt><dd>${esc(a.schwere||'–')}</dd><dt>Teile</dt><dd>${esc(L(a.teile)||'–')}</dd>
+    <dt>Video reicht</dt><dd>${yn(a.video_reicht)}</dd><dt>Totalschaden möglich</dt><dd>${yn(a.totalschaden_moeglich)}</dd><dt>Plausibel</dt><dd>${yn(a.plausibel)}</dd>
+    <dt>Auffälligkeiten</dt><dd>${esc(L(a.auffaelligkeiten)||'–')}</dd><dt>Versteckte Schäden</dt><dd>${esc(L(a.versteckte_schaeden)||'–')}</dd>
+    <dt>Fotoqualität</dt><dd>${esc(a.foto_qualitaet||'–')}</dd><dt>Fehlende Fotos</dt><dd>${esc(L(a.fehlende_fotos)||'–')}</dd></dl>
+    ${a.zusammenfassung?`<div class="ev">${esc(a.zusammenfassung)}</div>`:''}<span class="sm mut">Nur eine Ersteinschätzung, sie ersetzt kein Gutachten.</span>`:'<span class="sm mut">Noch keine Analyse.</span>'}
+    ${S.cfg.ai?`<button class="btn b2 noprint" id="airun">${a?'KI-Analyse neu starten':'KI-Analyse starten'}</button>`:''}</div>`;
+  }
+  return h;
+}
 const V={
 login:()=>`<div class="auth"><div class="card"><h1>Klarfall Portal</h1><p class="sm mut">Für Büro, Firmen, Kanzleien, Sachverständige, Werkstätten und Vermieter.</p>${msg()}
   <form id="loginf" style="display:flex;flex-direction:column;gap:12px"><div><label class="l" for="l_mail">E-Mail</label><input id="l_mail" type="email" autocomplete="email" required></div>
@@ -96,6 +117,7 @@ fall:()=>{
       <form id="upf" class="noprint" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><input type="text" id="up_label" placeholder="Bezeichnung, z. B. Gutachten" style="flex:1 1 200px"><input type="file" id="up_files" multiple accept="image/*,application/pdf,video/*" style="flex:1 1 200px"><button class="btn" type="submit">Hochladen</button></form></div>
    </div>
    <div style="display:flex;flex-direction:column;gap:18px">
+    ${extraPanels()}
     ${office?`<form class="card noprint" id="editf"><h2>Bearbeiten</h2>
       <div class="two"><div><label class="l" for="e_status">Status</label><select id="e_status">${STATUS.map(s=>`<option${s===c.status?' selected':''}>${esc(s)}</option>`).join('')}</select></div>
       <div><label class="l" for="e_company_id">Firma</label><select id="e_company_id"><option value="">Privat</option>${S.companies.map(co=>`<option value="${co.id}"${c.company_id===co.id?' selected':''}>${esc(co.name)}</option>`).join('')}</select></div>
@@ -104,6 +126,7 @@ fall:()=>{
       <div><label class="l" for="e_liability">Haftung</label><input id="e_liability" type="text" placeholder="z. B. 100 % Gegner" ${val('liability')}></div><div><label class="l" for="e_claim_no">Schaden-Nr.</label><input id="e_claim_no" type="text" ${val('claim_no')}></div>
       <div><label class="l" for="e_damage_amount">Schaden laut Gutachten (€)</label><input id="e_damage_amount" type="number" step="0.01" ${val('damage_amount')}></div><div><label class="l" for="e_claim_amount">Gefordert (€)</label><input id="e_claim_amount" type="number" step="0.01" ${val('claim_amount')}></div>
       <div><label class="l" for="e_paid_amount">Bezahlt (€)</label><input id="e_paid_amount" type="number" step="0.01" ${val('paid_amount')}></div><div><label class="l" for="e_days_off">Ausfalltage</label><input id="e_days_off" type="number" ${val('days_off')}></div></div>
+      ${S.cfg.video?`<div><label class="l" for="e_video_at">Videotermin</label><input id="e_video_at" type="datetime-local" value="${c.video_at?new Date(c.video_at-new Date(c.video_at).getTimezoneOffset()*6e4).toISOString().slice(0,16):''}"></div>`:''}
       <div><label class="l" for="e_note_internal">Interne Notiz (nur Büro)</label><textarea id="e_note_internal">${esc(c.note_internal||'')}</textarea></div>
       <button class="btn" type="submit">Speichern</button></form>`:''}
     <div class="card"><h2>Verlauf &amp; Nachrichten</h2><p class="sm mut">${office?'Nachrichten sehen alle Beteiligten des Falls, außer sie sind als intern markiert.':'Nachrichten sehen das Klarfall-Team, der Kunde und die anderen Partner dieses Falls.'}</p>
@@ -167,6 +190,8 @@ root.addEventListener('click',async e=>{
   if(t.id==='logout'){e.preventDefault();await api('/api/auth/logout',{method:'POST'}).catch(()=>{});S.me=null;location.hash='';render();return}
   if(t.dataset.filter){S.filter=t.dataset.filter;await loadList();render();return}
   if(t.id==='print'){window.print();return}
+  if(t.id==='video'){const w=window.open('','_blank');t.textContent='Wird geöffnet …';try{const r=await api(`/api/cases/${S.cur.case.id}/video`,{method:'POST'});if(w)w.location=r.url;else location.href=r.url;t.textContent='Videocall starten'}catch(err){if(w)w.close();S.msg={t:err.message};render()}return}
+  if(t.id==='airun'){t.disabled=true;t.textContent='Läuft …';try{await api(`/api/cases/${S.cur.case.id}/ai`,{method:'POST'});S.msg={ok:1,t:'KI-Analyse gestartet. Ergebnis erscheint in etwa einer Minute.'};setTimeout(()=>{if(S.route==='fall-'+S.cur.case.id)route()},20000);await route()}catch(err){S.msg={t:err.message};render()}return}
   if(t.id==='copy'){
     const {case:c,files,parties}=S.cur;
     const txt=[`Fall ${c.no} (${c.status})`,`Unfall: ${c.type}, ${dt(c.when_ts)}, ${c.place||''}`,`Fahrzeug: ${c.own_plate||'–'}${c.commercial?' (gewerblich)':''}`,`Kunde: ${parties.customer?.name||'–'}, ${parties.customer?.phone||''} ${parties.customer?.email||''}`,`Gegner: ${[c.opp_plate,c.opp_ins,c.opp_name,c.opp_phone].filter(Boolean).join(', ')||'–'}`,`Zeugen: ${c.witness||'–'}`,`Polizei: ${c.police||'–'}`,`Hergang: ${c.text||'–'}`,`Schuld laut Kunde: ${c.fault||'–'} · Rechtsschutz: ${c.has_rs||'–'}`,`Fotos/Dokumente: ${files.length} – ${location.origin}/portal/#fall-${c.id}`].join('\n');
@@ -181,6 +206,7 @@ root.addEventListener('submit',async e=>{
     if(f.id==='loginf'){await api('/api/auth/login',{json:{email:v('l_mail'),password:v('l_pw')}});return boot()}
     if(f.id==='editf'){
       const body={};['status','company_id','expert_id','lawyer_id','workshop_id','rental_id','liability','claim_no','damage_amount','claim_amount','paid_amount','days_off','note_internal'].forEach(k=>body[k]=v('e_'+k));
+      if(document.getElementById('e_video_at')){const x=v('e_video_at');body.video_at=x?new Date(x).getTime():null}
       await api('/api/cases/'+S.cur.case.id,{method:'PATCH',json:body});S.msg={ok:1,t:'Gespeichert.'};await route();return;
     }
     if(f.id==='msgf'){const text=v('m_text').trim();if(!text)return;await api(`/api/cases/${S.cur.case.id}/events`,{json:{text,internal:document.getElementById('m_int')?.checked}});await route();return}
@@ -192,6 +218,7 @@ root.addEventListener('submit',async e=>{
 });
 
 async function boot(){
+  try{S.cfg=await api('/api/config')}catch(e){S.cfg={}}
   try{S.me=(await api('/api/me')).user}catch(e){S.me=null}
   if(S.me&&['kunde','fahrer'].includes(S.me.role)){location.href='/app/';return}
   S.msg='';route();

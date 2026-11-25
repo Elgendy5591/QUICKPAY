@@ -92,4 +92,20 @@ CREATE INDEX IF NOT EXISTS idx_events_case ON events(case_id);
 CREATE INDEX IF NOT EXISTS idx_files_case ON files(case_id);
 `);
 
+// Spalten nachrüsten (bestehende Datenbanken werden automatisch erweitert)
+function addCol(table, col, def) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all().map(c => c.name);
+  if (!cols.includes(col)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`);
+}
+addCol('users', 'notify_channel', "TEXT DEFAULT 'email'");
+addCol('users', 'lang', "TEXT DEFAULT 'de'");
+addCol('cases', 'lang', "TEXT DEFAULT 'de'");
+addCol('cases', 'signed_at', 'INTEGER');
+addCol('cases', 'video_room', 'TEXT');
+addCol('cases', 'video_url', 'TEXT');
+addCol('cases', 'video_at', 'INTEGER');
+addCol('cases', 'ai_json', 'TEXT');
+addCol('cases', 'ai_at', 'INTEGER');
+addCol('cases', 'ai_status', 'TEXT');
+
 module.exports = { db, DATA_DIR };

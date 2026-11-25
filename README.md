@@ -5,9 +5,9 @@ Node.js + Express + SQLite, ohne Build-Schritt.
 
 | Adresse | Für wen | Was |
 |---|---|---|
-| `/` | alle | Webseite mit Unfallmeldung ohne Konto, Flotten-Rechner, FAQ |
-| `/app/` | Kunden, Fahrer | Konto, Unfall melden (Fotos, Sprache, GPS), Status, Nachrichten, Dokumente nachreichen. Als App auf dem Handy installierbar (PWA) |
-| `/portal/` | Büro, Firmen, Kanzleien, Sachverständige, Werkstätten, Vermieter | Fälle, Bearbeitung, Zuweisung, Beträge, Nachrichten, Dateien, CSV-Export, Benutzer- und Firmenverwaltung |
+| `/` | alle | Webseite mit Unfallmeldung ohne Konto, Flotten-Rechner, FAQ – in 4 Sprachen |
+| `/app/` | Kunden, Fahrer | Konto, Unfall melden (Fotos, Diktieren, GPS), digitale Vollmacht mit Unterschrift, Video-Gutachten, KI-Kostenschätzung, Status, Nachrichten, Dokumente nachreichen. Deutsch, Türkisch, Arabisch, Englisch. Als App installierbar (PWA) und für App Store / Google Play vorbereitet (`mobile/`) |
+| `/portal/` | Büro, Firmen, Kanzleien, Sachverständige, Werkstätten, Vermieter | Fälle, Bearbeitung, Zuweisung, Beträge, Videotermine und Videocall, KI-Analyse, unterschriebene Vollmachten, Nachrichten, Dateien, CSV-Export, Benutzer- und Firmenverwaltung |
 
 ## Rollen
 
@@ -92,37 +92,70 @@ sqlite3 data/klarfall.db ".backup data/backup-$(date +%F).db"
 tar czf backup-$(date +%F).tgz data/
 ```
 
-## E-Mail-Benachrichtigungen
+## Zusatzfunktionen einschalten
 
-Mit SMTP-Daten in `.env` gehen automatisch E-Mails raus:
-- an das Büro bei neuem Fall und bei Nachrichten von Kunden oder Partnern
-- an Kunden bei Statusänderung und Nachrichten vom Büro
-- an Partner bei Zuweisung eines Falls
-- an neue Nutzer mit ihren Zugangsdaten
+Alles läuft auch ohne diese Konten. Jede Funktion schaltet sich ein, sobald die Werte in `.env` stehen (danach Server neu starten). Vorlage: `.env.example`.
 
-Ohne SMTP wird nur ins Log geschrieben. Code: `src/notify.js` (dort lassen sich auch SMS/WhatsApp ergänzen).
+| Funktion | Was ihr braucht | Werte in `.env` |
+|---|---|---|
+| **E-Mail** | SMTP-Zugang eures Mail-Anbieters | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` |
+| **SMS** | Twilio-Konto mit Nummer oder Absendername | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_SMS_FROM` |
+| **WhatsApp** | Twilio WhatsApp-Absender (Meta-Freigabe) und eine genehmigte Vorlage mit Variable `{{1}}` | `TWILIO_WHATSAPP_FROM`, `TWILIO_WA_TEMPLATE_SID` |
+| **Video-Gutachten** | Jitsi (kostenlos, sofort), Daily.co oder Whereby | `VIDEO_PROVIDER` und `JITSI_DOMAIN` bzw. `DAILY_API_KEY` bzw. `WHEREBY_API_KEY` |
+| **KI-Schadenerkennung** | API-Schlüssel von console.anthropic.com | `ANTHROPIC_API_KEY`, optional `AI_MODEL` |
+| **Vollmacht** | nichts – Text in `config/vollmacht.txt` vor dem Start von eurem Anwalt prüfen lassen | `COMPANY_NAME` |
+
+### Benachrichtigungen
+- Büro: neuer Fall, Nachrichten von Kunden und Partnern (E-Mail).
+- Kunden: Eingang der Meldung, Statusänderung, Nachricht vom Büro, Videotermin – **in ihrer Sprache** und über den Kanal, den sie in der App wählen (E-Mail, SMS oder WhatsApp). Klappt ein Kanal nicht, geht es per E-Mail, dann per SMS.
+- Partner: Zuweisung eines Falls, Videotermin (E-Mail).
+
+Ohne Zugangsdaten wird nur ins Log geschrieben. Code: `src/notify.js`.
+
+### Digitale Vollmacht
+Der Kunde unterschreibt in der App mit dem Finger – direkt beim Melden oder später im Fall. Der Server erzeugt daraus ein PDF mit Text, Unterschrift, Zeitpunkt, IP-Adresse, Gerät und einer Prüfsumme (SHA-256) und legt es beim Fall ab. Den Text ändert ihr in `config/vollmacht.txt` (Platzhalter in `{geschweiften Klammern}`, Erklärung oben in der Datei).
+
+### Video-Gutachten
+- **Jitsi**: `VIDEO_PROVIDER=jitsi`, `JITSI_DOMAIN=meet.jit.si` reicht zum Testen. Für den Betrieb eigener Jitsi-Server oder 8x8 JaaS mit `JITSI_APP_ID`/`JITSI_APP_SECRET` – dann bekommen Gutachter und Büro Moderatorrechte per Token.
+- **Daily** / **Whereby**: Räume werden pro Fall automatisch angelegt.
+- Büro trägt im Portal den Videotermin ein → Kunde und Gutachter werden benachrichtigt. Beide starten den Call mit einem Knopf im Fall.
+
+### KI-Schadenerkennung
+Sobald ein Fall Fotos hat, analysiert die KI sie im Hintergrund: betroffene Teile, Schwere, Kostenspanne, ob ein Video-Gutachten reicht, mögliche versteckte Schäden, Plausibilität zum Hergang, fehlende Fotos. Büro und Gutachter sehen alles im Portal und können die Analyse neu starten. Kunden sehen nur die Kostenspanne und welche Fotos noch fehlen. Die KI ist eine Ersteinschätzung und ersetzt kein Gutachten.
+
+### Sprachen
+App und Webseite: Deutsch, Türkisch, Arabisch (von rechts nach links), Englisch. Texte: `public/assets/i18n-app.js` und `public/assets/i18n-site.js`. Das Portal ist auf Deutsch. Die Vollmacht ist rechtlich auf Deutsch; Kunden sehen dazu einen Hinweis in ihrer Sprache.
+
+### App Store und Google Play
+Siehe `mobile/README.md`. Kurz: `cd mobile && npm install`, Domain setzen, `npm run add:android` und/oder `npm run add:ios`, dann in Android Studio bzw. Xcode bauen und hochladen.
 
 ## Erste Schritte nach dem Start
 
 1. Mit dem Büro-Zugang unter `/portal/` anmelden.
 2. **Firmen** anlegen (z. B. eure eigene Flotte).
 3. **Benutzer** anlegen: Fahrer (mit Firma), Firmen-Zugang, Kanzleien, Sachverständige, Werkstätten, Vermieter. Das Startpasswort wird angezeigt (und mit SMTP per E-Mail geschickt).
-4. Fahrer öffnen `/app/` auf dem Handy, melden sich an und tippen im Browser „Zum Startbildschirm hinzufügen“.
-5. Vor dem öffentlichen Start: Platzhalter ersetzen (Telefon, E-Mail, Adresse in `public/index.html`) und `public/impressum.html`, `public/datenschutz.html`, `public/garantie.html` ausfüllen.
+4. Fahrer öffnen `/app/` auf dem Handy, melden sich an und tippen im Browser „Zum Startbildschirm hinzufügen“ – oder installieren die Store-App.
+5. Vor dem öffentlichen Start: Platzhalter ersetzen (Telefon, E-Mail, Adresse in `public/index.html`), `public/impressum.html`, `public/datenschutz.html`, `public/garantie.html` ausfüllen und `config/vollmacht.txt` anpassen.
 
 ## Projektstruktur
 
 ```
 server.js              Server und komplette API
 src/db.js              Datenbank-Schema
-src/notify.js          E-Mail-Versand
+src/notify.js          E-Mail, SMS, WhatsApp (Texte in 4 Sprachen)
+src/pdf.js             Vollmacht als PDF mit Unterschrift
+src/video.js           Videoräume (Jitsi, Daily, Whereby)
+src/ai.js              KI-Schadenerkennung
 src/env.js             liest .env
+config/vollmacht.txt   Text der Vollmacht
+src/fonts/             Schrift für das PDF (DejaVu, freie Lizenz)
 scripts/create-admin.js  Büro-Zugang anlegen
 scripts/smoke-test.js    automatischer Test
 public/index.html      Webseite
 public/app/            Kunden-/Fahrer-App (PWA)
 public/portal/         Portal Büro/Firma/Partner
-public/assets/         gemeinsames CSS, JS, Icon
+public/assets/         gemeinsames CSS, JS, Übersetzungen, Icons
+mobile/                App-Store-/Play-Store-Projekt (Capacitor)
 ```
 
 ## API (Kurzüberblick)
@@ -138,12 +171,16 @@ public/assets/         gemeinsames CSS, JS, Icon
 | GET | `/files/:id` | Beteiligte |
 | GET | `/api/export.csv` | Büro, Firma |
 | GET/POST/PATCH | `/api/users`, `/api/companies`, `/api/partners` | Büro |
+| PATCH | `/api/me` (Sprache, Kanal, Telefon) | angemeldet |
+| GET | `/api/config` (welche Zusatzfunktionen aktiv sind) | alle |
+| GET | `/api/vollmacht-vorlage`, `/api/cases/:id/vollmacht` | Vorschau des Textes |
+| POST | `/api/cases/:id/sign` (`signature` als PNG-Data-URL) | Kunde, Fahrer, Büro |
+| POST | `/api/cases/:id/video` | Kunde, Fahrer, Büro, Gutachter, Anwalt |
+| POST | `/api/cases/:id/ai` | Büro, Gutachter |
 
-## Noch nicht enthalten (nächste Ausbaustufen)
+## Tests
 
-- **Video-Gutachten live**: Anbieter wie Daily, Whereby oder Twilio Video einbinden. Bis dahin wählt der Kunde „Video“, das Büro vereinbart den Termin.
-- **KI-Schadenerkennung**: Schnittstelle zu Audatex, DAT oder Tractable; Bilder liegen bereits strukturiert pro Fall vor.
-- **SMS/WhatsApp, Push**: in `src/notify.js` ergänzen.
-- **Digitale Vollmacht mit Signatur**: als nächster Schritt in der App.
-- **Native Apps im App Store / Google Play**: die PWA kann z. B. mit Capacitor verpackt werden.
-- **Mehrsprachigkeit**: Texte liegen bisher auf Deutsch vor.
+```bash
+npm test
+```
+Startet den Server mit einer Testdatenbank und prüft Anmeldung, Rechte, Fälle, Dateien, Vollmacht-PDF, Video, KI und SMS/WhatsApp (externe Dienste werden dabei simuliert).
