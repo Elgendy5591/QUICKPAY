@@ -33,42 +33,44 @@ npm start                     # http://localhost:3000
 npm test                      # automatischer Test aller Rollen
 ```
 
-## Auf GitHub hochladen
+## Code auf GitHub
+
+Der Code liegt in https://github.com/Elgendy5591/QUICKPAY (Branch `main`). Änderungen hochladen:
 
 ```bash
-git init
-git add .
-git commit -m "Klarfall erste Version"
-git branch -M main
-git remote add origin https://github.com/<EUER-KONTO>/klarfall.git
-git push -u origin main
+git add . && git commit -m "Beschreibung" && git push
 ```
 
 `.env`, `data/` (Datenbank und Fotos) und `node_modules/` werden durch `.gitignore` nicht hochgeladen.
 
 ## Auf einen Server bringen
 
-### Mit Docker (empfohlen)
+### Mit Docker (empfohlen) – inklusive HTTPS
+
+Ihr braucht: einen Linux-Server (z. B. Hetzner CX22, ca. 5 € im Monat) mit Docker und eine Domain.
+
+1. Im DNS der Domain zwei A-Einträge auf die Server-IP setzen: `eure-domain.de` und `www.eure-domain.de`.
+2. Auf dem Server:
 
 ```bash
-git clone https://github.com/<EUER-KONTO>/klarfall.git && cd klarfall
-cp .env.example .env          # BASE_URL, OFFICE_EMAIL, SMTP setzen
+curl -fsSL https://get.docker.com | sh            # Docker installieren (einmalig)
+git clone https://github.com/Elgendy5591/QUICKPAY.git klarfall && cd klarfall
+cp .env.example .env
+nano .env                                          # DOMAIN, BASE_URL, OFFICE_EMAIL, SMTP … eintragen
 docker compose up -d --build
-docker compose exec klarfall node scripts/create-admin.js buero@firma.de "Name" Passwort123
+docker compose exec klarfall node scripts/create-admin.js buero@firma.de "Name" EinSicheresPasswort
 ```
 
-### HTTPS und Domain
-
-Die App läuft auf Port 3000. Davor einen Reverse-Proxy mit HTTPS setzen, z. B. Caddy (`/etc/caddy/Caddyfile`):
-
-```
-klarfall.de, www.klarfall.de {
-    reverse_proxy localhost:3000
-}
-```
-
-Caddy holt das HTTPS-Zertifikat automatisch. Im DNS der Domain einen A-Eintrag auf die Server-IP setzen.
+Fertig: `https://eure-domain.de`. Caddy holt das HTTPS-Zertifikat automatisch (Ports 80 und 443 müssen offen sein).
 HTTPS ist Pflicht: ohne HTTPS funktionieren Kamera, Standort und die App-Installation auf dem Handy nicht.
+
+Updates einspielen:
+
+```bash
+cd klarfall && git pull && docker compose up -d --build
+```
+
+Logs ansehen: `docker compose logs -f klarfall`
 
 ### Ohne Docker
 
@@ -183,4 +185,5 @@ mobile/                App-Store-/Play-Store-Projekt (Capacitor)
 ```bash
 npm test
 ```
+Auf GitHub laufen die Tests und ein Docker-Build automatisch bei jedem Upload (Reiter *Actions*).
 Startet den Server mit einer Testdatenbank und prüft Anmeldung, Rechte, Fälle, Dateien, Vollmacht-PDF, Video, KI und SMS/WhatsApp (externe Dienste werden dabei simuliert).
