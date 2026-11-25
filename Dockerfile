@@ -8,6 +8,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 make g+
 COPY . .
 RUN mkdir -p /data && chown -R node:node /data /app
 USER node
-VOLUME ["/data"]
 EXPOSE 3000
 CMD ["node", "server.js"]
